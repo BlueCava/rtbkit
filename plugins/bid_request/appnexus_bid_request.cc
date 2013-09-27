@@ -89,100 +89,102 @@ fromAppNexus(const AppNexus::BidRequest & req,
     std::unique_ptr<OpenRTB::Content> content(new OpenRTB::Content);
     content->url = Url(req.bidInfo.url); // Datacratic::Url from Datacatic Utf8String
 
-    // OpenRTB::Impression
-    OpenRTB::Impression impression;
-    std::unique_ptr<OpenRTB::Banner> banner(new OpenRTB::Banner);
-    impression.banner.reset(banner.release());
-    // TODO CONFIRM THIS ASSUMPTION
-    // NOTE: Assume for now that AN price units are in full currency units per CPM, e.g. if currency is USD
-    // then the reserve_price == '1.00 USD' then this is a price of $1 CPM. i.e. - price not in microdollars etc.
-    // Note that OpenRTB mapped field is Impression::bidfloorcur, and its unit is again full units per CPM, e.g. $1 CPM
-    // So the code in appnexus_parsing.cc for now simply assumes the AN price equals the OpenRTB price
-    // Also, for now, only support USD. 
-    // To save calling vector member function repeatedly
-    // TODO validate there is at least one Tag in tags. vector data member will only
-    //  be initialized to be typed vector, not to hold any actual objects
-    const AppNexus::Tag & reqTag = req.tags.front();
-
-    impression.bidfloor.val = reqTag.reservePrice.val;
-
-    // TODO Add code in ./plugins/exchange/appnexus_exchange_connector.cc to call its inherited configure() method
-    //   and set a key for bid_currency there, and then check it here and set it to the OpenRTB bidfloorcur field
-    // string bidfloorcur;
-    // req.getParam(AppNexusExchangeConnector::getParameters, bidfloorcur ["bid_currency"]);
-    // impression->bidfloorcur = atof(bidfloorcur.str());
-
-    /*
-    TODO - come back to this. What we need is:
-    - access to AN docs
-    - enums for AN for Tag::allowedMediaTypes
-    - identify the AN mediaTypes that are for "banner" and for "video"
-    - have conditional code that sets OpenRTB Impression::Video.topframe or Impression::Banner.topframe depending
-    auto iframePosn = FramePosition::TOPFRAME;
-    if (! req.bidInfo.withinIframe) {
-        iframePosn = FramePosition::IFRAME;
-    }
-    if (reqTag.allowedMediaTypes == "banner") {
-        impression->banner.topframe = iframePosn;
-    }
-    else if (reqTag.allowedMediaTypes == "video") {
-        impression->video.topframe = iframePosn;
-    }
-    */
-    impression.id = Id(reqTag.auctionId64.val);
-    // BUSINESS RULE: AN provides both a 'size' field and a 'sizes' field.
-    // OpenRTB provides two fields, ordered lists, for 'w' and 'h'. So values at each index must match
-    // and provide a 'WxH' pair. Also, because AN provides both, we first put the values from 'size' into
-    // the OpenRTB fields, then, in addition put all the values in from 'sizes'. Also, deduped.
-    set<string> dedupedSizes;
-    if (!reqTag.size.empty())
-    {
-      dedupedSizes.insert(reqTag.size);
-    }
-    dedupedSizes.insert(reqTag.sizes.begin(), reqTag.sizes.end());
-    for (string adSizePair : dedupedSizes) {
-        splitIdx = adSizePair.find('x');
-        int w = boost::lexical_cast<int>(adSizePair.substr(0, splitIdx));
-        int h = boost::lexical_cast<int>(adSizePair.substr(splitIdx + 1));
-        impression.banner->w.push_back(w);
-        impression.banner->h.push_back(h);
-    }
-    OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
-    impression.banner->pos.val = position.val;
-
-    // OpenRTB::Publisher
-    std::unique_ptr<OpenRTB::Publisher> publisher1(new OpenRTB::Publisher);
-    std::unique_ptr<OpenRTB::Publisher> publisher2(new OpenRTB::Publisher);
-
-    // OpenRTB::Site
-    std::unique_ptr<OpenRTB::Site> site(new OpenRTB::Site);
-    site->publisher.reset(publisher1.release());
-    site->id = reqTag.inventorySourceId;
-
-    // OpenRTB::App
-    std::unique_ptr<OpenRTB::App> app(new OpenRTB::App);
-    app->publisher.reset(publisher2.release());
-
-    // BUSINESS RULE - This is a weak test for "is this an app or a site"
-    //  Can't see a better way to do this in AN, so we see if the Bid has an appId
-    if (req.bidInfo.appId == "") { // It's a 'site' and not an 'app'
-        //site->publisher->id = Id(req.bidInfo.publisherId.val);
-    }
-    else { // It's an 'app' and not a 'site'
-        app->publisher->id = Id(req.bidInfo.publisherId.val);
-    }
-    // But always just statelessy assign appId. If it's empty, no harm
-    app->id = Id(req.bidInfo.appId);
-
+    // =========================================================================
     // BidRequest
     std::unique_ptr<BidRequest> bidRequest(new BidRequest);
     bidRequest->timeAvailableMs = req.bidderTimeoutMs.val;
     bidRequest->device.reset(device.release());
     bidRequest->user.reset(user.release());
     // bidRequest->content.reset(content.release());
-    bidRequest->imp.emplace_back(std::move(impression));
-    bidRequest->app.reset(app.release());
-    bidRequest->site.reset(site.release());
+
+    // Process multi-tags AppNexus bid_request
+    for (auto const& reqTag : req.tags)
+    {
+      // OpenRTB::Impression
+      OpenRTB::Impression impression;
+      std::unique_ptr<OpenRTB::Banner> banner(new OpenRTB::Banner);
+      impression.banner.reset(banner.release());
+      // TODO CONFIRM THIS ASSUMPTION
+      // NOTE: Assume for now that AN price units are in full currency units per CPM, e.g. if currency is USD
+      // then the reserve_price == '1.00 USD' then this is a price of $1 CPM. i.e. - price not in microdollars etc.
+      // Note that OpenRTB mapped field is Impression::bidfloorcur, and its unit is again full units per CPM, e.g. $1 CPM
+      // So the code in appnexus_parsing.cc for now simply assumes the AN price equals the OpenRTB price
+      // Also, for now, only support USD. 
+      impression.bidfloor.val = reqTag.reservePrice.val;
+
+      // TODO Add code in ./plugins/exchange/appnexus_exchange_connector.cc to call its inherited configure() method
+      //   and set a key for bid_currency there, and then check it here and set it to the OpenRTB bidfloorcur field
+      // string bidfloorcur;
+      // req.getParam(AppNexusExchangeConnector::getParameters, bidfloorcur ["bid_currency"]);
+      // impression->bidfloorcur = atof(bidfloorcur.str());
+
+      /*
+	TODO - come back to this. What we need is:
+	- access to AN docs
+	- enums for AN for Tag::allowedMediaTypes
+	- identify the AN mediaTypes that are for "banner" and for "video"
+	- have conditional code that sets OpenRTB Impression::Video.topframe or Impression::Banner.topframe depending
+	auto iframePosn = FramePosition::TOPFRAME;
+	if (! req.bidInfo.withinIframe) {
+        iframePosn = FramePosition::IFRAME;
+	}
+	if (reqTag.allowedMediaTypes == "banner") {
+        impression->banner.topframe = iframePosn;
+	}
+	else if (reqTag.allowedMediaTypes == "video") {
+        impression->video.topframe = iframePosn;
+	}
+      */
+      impression.id = Id(reqTag.auctionId64.val);
+      // BUSINESS RULE: AN provides both a 'size' field and a 'sizes' field.
+      // OpenRTB provides two fields, ordered lists, for 'w' and 'h'. So values at each index must match
+      // and provide a 'WxH' pair. Also, because AN provides both, we first put the values from 'size' into
+      // the OpenRTB fields, then, in addition put all the values in from 'sizes'. Also, deduped.
+      set<string> dedupedSizes;
+      if (!reqTag.size.empty())
+      {
+	dedupedSizes.insert(reqTag.size);
+      }
+      dedupedSizes.insert(reqTag.sizes.begin(), reqTag.sizes.end());
+      for (string adSizePair : dedupedSizes) {
+        splitIdx = adSizePair.find('x');
+        int w = boost::lexical_cast<int>(adSizePair.substr(0, splitIdx));
+        int h = boost::lexical_cast<int>(adSizePair.substr(splitIdx + 1));
+        impression.banner->w.push_back(w);
+        impression.banner->h.push_back(h);
+      }
+      OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
+      impression.banner->pos.val = position.val;
+
+      // OpenRTB::Publisher
+      std::unique_ptr<OpenRTB::Publisher> publisher1(new OpenRTB::Publisher);
+      std::unique_ptr<OpenRTB::Publisher> publisher2(new OpenRTB::Publisher);
+
+      // OpenRTB::Site
+      std::unique_ptr<OpenRTB::Site> site(new OpenRTB::Site);
+      site->publisher.reset(publisher1.release());
+      site->id = reqTag.inventorySourceId;
+
+      // OpenRTB::App
+      std::unique_ptr<OpenRTB::App> app(new OpenRTB::App);
+      app->publisher.reset(publisher2.release());
+
+      // BUSINESS RULE - This is a weak test for "is this an app or a site"
+      //  Can't see a better way to do this in AN, so we see if the Bid has an appId
+      if (req.bidInfo.appId == "") { // It's a 'site' and not an 'app'
+        //site->publisher->id = Id(req.bidInfo.publisherId.val);
+      }
+      else { // It's an 'app' and not a 'site'
+        app->publisher->id = Id(req.bidInfo.publisherId.val);
+      }
+      // But always just statelessy assign appId. If it's empty, no harm
+      app->id = Id(req.bidInfo.appId);
+
+      bidRequest->imp.emplace_back(std::move(impression));
+      bidRequest->app.reset(app.release());
+      bidRequest->site.reset(site.release());
+    }
+    //==========================================================================
 
     /*
     if (req.at.value() != OpenRTB::AuctionType::SECOND_PRICE)
