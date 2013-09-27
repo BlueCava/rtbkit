@@ -7,14 +7,5 @@
         "auctionVerb": "POST",
         "auctionResource": "/auctions",
         "performNameLookup": false
-    },
-    {
-        "exchangeType": "appnexus",
-        "listenPort": 12400,
-        "bindHost": "0.0.0.0",
-        "auctionVerb": "POST",
-        "auctionResource": "/auctions",
-        "performNameLookup": false
     }
-
 ]

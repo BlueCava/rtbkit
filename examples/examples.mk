@@ -6,11 +6,6 @@
 # Makefile for various RTBkit examples. 
 #------------------------------------------------------------------------------#
 
-$(eval $(call library,bc_augmentor,bc_augmentor.cc,augmentor_base rtb bid_request agent_configuration redis))
-$(eval $(call program,bc_augmentor_runner,bc_augmentor boost_program_options))
-$(eval $(call program,bc_data_logger,data_logger data_logger boost_program_options services))
-$(eval $(call program,bc_bidding_agent,bidding_agent rtb_router boost_program_options services))
-
 $(eval $(call library,augmentor_ex,augmentor_ex.cc,augmentor_base rtb bid_request agent_configuration))
 $(eval $(call library,mock_exchange,mock_exchange_connector.cc,exchange))
 
@@ -23,7 +18,7 @@ $(eval $(call program,adserver_endpoint,standard_adserver data_logger rtb_router
 $(eval $(call program,integration_endpoints,exchange standard_adserver data_logger rtb_router bidding_agent boost_program_options services))
 
 RTBKIT_INTEGRATION_TEST_LINK := \
-	rtb_router bidding_agent integration_test_utils monitor monitor_service augmentor_ex bc_augmentor adserver_connector mock_bid_request mock_adserver
+	rtb_router bidding_agent integration_test_utils monitor monitor_service augmentor_ex adserver_connector mock_bid_request mock_adserver
 
 $(eval $(call test,rtbkit_integration_test,$(RTBKIT_INTEGRATION_TEST_LINK),boost))
 
