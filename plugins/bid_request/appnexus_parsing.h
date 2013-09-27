@@ -1,8 +1,5 @@
-/* openrtb_parsing.h                                               -*- C++ -*-
-   Mark Weiss, 28 March 2013
-   Copyright (c) 2013 Datacratic Inc.  All rights reserved.
-
-   Code to parse AppNexus bid requests.
+/*
+  Code to parse AppNexus bid requests.
 */
 
 #pragma once
@@ -18,8 +15,8 @@ using std::string;
 namespace Datacratic {
 
 
-template<>
-struct DefaultDescription<AppNexus::AdPosition>
+  template<>
+  struct DefaultDescription<AppNexus::AdPosition>
     : public TaggedEnumDescription<AppNexus::AdPosition> {
 
     DefaultDescription()
@@ -27,62 +24,74 @@ struct DefaultDescription<AppNexus::AdPosition>
     }
 
     void parseJsonTyped(AppNexus::AdPosition * val,
-                   JsonParsingContext & context) const
+			JsonParsingContext & context) const
     {
-        string appNexAdPos = context.expectStringAscii();
+      string appNexAdPos = context.expectStringAscii();
 
-        if (appNexAdPos == "unknown") {
-          val->val = AppNexus::AdPosition::UNKNOWN;
-        } 
-        else if (appNexAdPos == "above") {
-          val->val = AppNexus::AdPosition::ABOVE;
-        } 
-        else if (appNexAdPos == "below") {
-          val->val = AppNexus::AdPosition::BELOW;
-        }
-        else { // AN only supports the above three AdPos types.
-               // ORTB supports others but AN does not.
-          val->val = AppNexus::AdPosition::UNSPECIFIED;
-        }
+      if (appNexAdPos == "unknown") {
+	val->val = AppNexus::AdPosition::UNKNOWN;
+      } 
+      else if (appNexAdPos == "above") {
+	val->val = AppNexus::AdPosition::ABOVE;
+      } 
+      else if (appNexAdPos == "below") {
+	val->val = AppNexus::AdPosition::BELOW;
+      }
+      else { // AN only supports the above three AdPos types.
+	// ORTB supports others but AN does not.
+	val->val = AppNexus::AdPosition::UNSPECIFIED;
+      }
     }
-};
+  };
 
 
-template<>
-struct DefaultDescription<AppNexus::BidRequest>
+  template<>
+  struct DefaultDescription<AppNexus::BidRequestRoot>
+    : public StructureDescription<AppNexus::BidRequestRoot> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::BidRequest>
     : public StructureDescription<AppNexus::BidRequest> {
     DefaultDescription();
-};
+  };
 
-template<>
-struct DefaultDescription<AppNexus::BidInfo>
+  template<>
+  struct DefaultDescription<AppNexus::BidInfo>
     : public StructureDescription<AppNexus::BidInfo> {
     DefaultDescription();
-};
+  };
 
-template<>
-struct DefaultDescription<AppNexus::Segment>
+  template<>
+  struct DefaultDescription<AppNexus::DeviceIds>
+    : public StructureDescription<AppNexus::DeviceIds> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::Segment>
     : public StructureDescription<AppNexus::Segment> {
     DefaultDescription();
-};
+  };
 
-template<>
-struct DefaultDescription<AppNexus::InventoryAudit>
+  template<>
+  struct DefaultDescription<AppNexus::InventoryAudit>
     : public StructureDescription<AppNexus::InventoryAudit> {
     DefaultDescription();
-};
+  };
 
-template<>
-struct DefaultDescription<AppNexus::Tag>
+  template<>
+  struct DefaultDescription<AppNexus::Tag>
     : public StructureDescription<AppNexus::Tag> {
     DefaultDescription();
-};
+  };
 
-template<>
-struct DefaultDescription<AppNexus::Member>
+  template<>
+  struct DefaultDescription<AppNexus::Member>
     : public StructureDescription<AppNexus::Member> {
     DefaultDescription();
-};
+  };
 
 
 } // namespace Datacratic

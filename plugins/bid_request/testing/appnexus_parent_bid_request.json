@@ -52,8 +52,8 @@
             "app_id":"0382f0b5-91a5-11e2-adf6-28cfe94b60bf",
             "loc":"38.7875232696533,-77.2614831924438",
             "carrier":101,
-            "make":1001,
-            "model":10001
+            "device_make":1001,
+            "device_model":10001
         },
     "members":[
         {

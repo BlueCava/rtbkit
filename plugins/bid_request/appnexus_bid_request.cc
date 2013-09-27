@@ -25,11 +25,6 @@ fromAppNexus(const AppNexus::BidRequest & req,
             const std::string & provider,
             const std::string & exchange)
 {
-    // To save calling vector member function repeatedly
-    // TODO validate there is at least one Tag in tags. vector data member will only
-    //  be initialized to be typed vector, not to hold any actual objects
-    const AppNexus::Tag & reqTag = req.tags.front();
-
     // OpenRTB::User
     std::unique_ptr<OpenRTB::User> user(new OpenRTB::User);
     user->id = Id(req.bidInfo.userId64.val);
@@ -47,8 +42,12 @@ fromAppNexus(const AppNexus::BidRequest & req,
     // https://wiki.appnexus.com/display/adnexusdocumentation/Operating+System+Service 
     // Helper function here converts AN OS code to a string, using the documentation from this URL retrieved as of Jun 2013
     int osCode = req.bidInfo.operatingSystem.val;
-    device->os = req.bidInfo.getANDeviceOsStringForCode(osCode);
-    device->osv = req.bidInfo.getANDeviceOsVersionStringForCode(osCode);
+    if (osCode >= 0) // handle out of range os code
+    {
+      device->os = req.bidInfo.getANDeviceOsStringForCode(osCode);
+      device->osv = req.bidInfo.getANDeviceOsVersionStringForCode(osCode);
+    }
+
     // TODO VALIDATION against ISO-639-1
     device->language = req.bidInfo.acceptedLanguages;
     // BUSINESS RULE:
@@ -64,10 +63,10 @@ fromAppNexus(const AppNexus::BidRequest & req,
     device->ipv6 = req.bidInfo.ipAddress;
     // TODO Need lookup of AN int code values to strings, from AN docs
     device->carrier = to_string(req.bidInfo.carrier.val);
+   // TODO Need lookup of AN int code values to strings, from AN docs
+    device->make = to_string(req.bidInfo.deviceMake.val);
     // TODO Need lookup of AN int code values to strings, from AN docs
-    device->make = to_string(req.bidInfo.make.val);
-    // TODO Need lookup of AN int code values to strings, from AN docs
-    device->model = to_string(req.bidInfo.model.val);
+    device->model = to_string(req.bidInfo.deviceModel.val);
     // TODO VALIDATION convert to ISO 3166-1 Alpha 3
     device->geo->country = req.bidInfo.country.rawString();
     device->geo->region = req.bidInfo.region.rawString();
@@ -80,12 +79,15 @@ fromAppNexus(const AppNexus::BidRequest & req,
     unsigned int splitIdx = req.bidInfo.loc.find(',');
     string lat = req.bidInfo.loc.substr(0, splitIdx);
     string lon = req.bidInfo.loc.substr(splitIdx + 1);
-    device->geo->lat.val = boost::lexical_cast<float>(lat);
-    device->geo->lon.val = boost::lexical_cast<float>(lon);
+    if (!lat.empty() && !lon.empty())
+    {
+      device->geo->lat.val = boost::lexical_cast<float>(lat);
+      device->geo->lon.val = boost::lexical_cast<float>(lon);
+    }
 
     // OpenRTB::Content
-    // std::unique_ptr<OpenRTB::Content> content(new OpenRTB::Content);
-    // content->url = Url(req.bidInfo.url); // Datacratic::Url from Datacatic Utf8String
+    std::unique_ptr<OpenRTB::Content> content(new OpenRTB::Content);
+    content->url = Url(req.bidInfo.url); // Datacratic::Url from Datacatic Utf8String
 
     // OpenRTB::Impression
     OpenRTB::Impression impression;
@@ -97,6 +99,11 @@ fromAppNexus(const AppNexus::BidRequest & req,
     // Note that OpenRTB mapped field is Impression::bidfloorcur, and its unit is again full units per CPM, e.g. $1 CPM
     // So the code in appnexus_parsing.cc for now simply assumes the AN price equals the OpenRTB price
     // Also, for now, only support USD. 
+    // To save calling vector member function repeatedly
+    // TODO validate there is at least one Tag in tags. vector data member will only
+    //  be initialized to be typed vector, not to hold any actual objects
+    const AppNexus::Tag & reqTag = req.tags.front();
+
     impression.bidfloor.val = reqTag.reservePrice.val;
 
     // TODO Add code in ./plugins/exchange/appnexus_exchange_connector.cc to call its inherited configure() method
@@ -128,7 +135,10 @@ fromAppNexus(const AppNexus::BidRequest & req,
     // and provide a 'WxH' pair. Also, because AN provides both, we first put the values from 'size' into
     // the OpenRTB fields, then, in addition put all the values in from 'sizes'. Also, deduped.
     set<string> dedupedSizes;
-    dedupedSizes.insert(reqTag.size);
+    if (!reqTag.size.empty())
+    {
+      dedupedSizes.insert(reqTag.size);
+    }
     dedupedSizes.insert(reqTag.sizes.begin(), reqTag.sizes.end());
     for (string adSizePair : dedupedSizes) {
         splitIdx = adSizePair.find('x');
@@ -156,7 +166,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     // BUSINESS RULE - This is a weak test for "is this an app or a site"
     //  Can't see a better way to do this in AN, so we see if the Bid has an appId
     if (req.bidInfo.appId == "") { // It's a 'site' and not an 'app'
-        site->publisher->id = Id(req.bidInfo.publisherId.val);
+        //site->publisher->id = Id(req.bidInfo.publisherId.val);
     }
     else { // It's an 'app' and not a 'site'
         app->publisher->id = Id(req.bidInfo.publisherId.val);
@@ -374,11 +384,11 @@ parseBidRequest(const std::string & jsonValue,
 {
     StructuredJsonParsingContext jsonContext(jsonValue);
 
-    AppNexus::BidRequest req;
-    Datacratic::DefaultDescription<AppNexus::BidRequest> desc;
-    desc.parseJson(&req, jsonContext);
+    AppNexus::BidRequestRoot reqRoot;
+    Datacratic::DefaultDescription<AppNexus::BidRequestRoot> desc;
+    desc.parseJson(&reqRoot, jsonContext);
 
-    return fromAppNexus(req, provider, exchange);
+    return fromAppNexus(reqRoot.bidRequest, provider, exchange);
 }
 
 BidRequest *
@@ -389,11 +399,11 @@ parseBidRequest(ML::Parse_Context & context,
 {
     StreamingJsonParsingContext jsonContext(context);
 
-    AppNexus::BidRequest req;
-    Datacratic::DefaultDescription<AppNexus::BidRequest> desc;
-    desc.parseJson(&req, jsonContext);
+    AppNexus::BidRequestRoot reqRoot;
+    Datacratic::DefaultDescription<AppNexus::BidRequestRoot> desc;
+    desc.parseJson(&reqRoot, jsonContext);
 
-    return fromAppNexus(req, provider, exchange);
+    return fromAppNexus(reqRoot.bidRequest, provider, exchange);
 }
 
 } // namespace RTBKIT
