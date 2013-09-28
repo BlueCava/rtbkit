@@ -225,7 +225,8 @@ namespace AppNexus {
     AppNexus::BidRequest bidRequest;
     Json::Value unparseable;    ///< Unparseable fields get put here
   };
-struct Response {
+
+struct BidResponse {
 	Id memberId;
 	TaggedInt64 auctionId;
 	TaggedBool exclusive;
@@ -240,8 +241,8 @@ struct Response {
 	Utf8String pixelType;
 };
 
-struct BidResponse {
-	vector<Response> responses;
+struct BidResponseRoot {
+	vector<BidResponse> responses;
 };
 
 struct NotifyTag {

@@ -284,25 +284,25 @@ namespace Datacratic {
     addField("unparseable", &AppNexus::Member::unparseable, "Unparseable fields are collected here");
   }
 
-DefaultDescription<AppNexus::Response>::DefaultDescription()
-{
-    addField("member_id", &AppNexus::Response::memberId, "Bid Request Member ID");
-    addField("auction_id_64", &AppNexus::Response::auctionId, "Auction Id from BidRequest");
-    addField("exclusive", &AppNexus::Response::exclusive, "Should be defaulted to false");
-    addField("no_bid", &AppNexus::Response::noBid, "True if there are no bids available for this tag");
-    addField("price", &AppNexus::Response::price, "Bidding price");
-    addField("userdata_js", &AppNexus::Response::userDataJS, "JS code that will alter the userdata in the cookie");
-    addField("custom_notify_data", &AppNexus::Response::customNotifyData, "Custom data to be passed back with notifications");
-    addField("creative_id", &AppNexus::Response::creativeId, "Creative Id to be passed back if won");
-    addField("creative_code", &AppNexus::Response::creativeCode, "creative code to be used instead or rhe default one in the repo.");
-    addField("click+url", &AppNexus::Response::clickUrl, "Flag marking bid request as a test call");
-    addField("pixel_url", &AppNexus::Response::pixelUrl, "pixel url for thia account");
-    addField("pixel_type", &AppNexus::Response::pixelType, "Type of pixel");    
-}
-
 DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
 {
-    addField("responses", &AppNexus::BidResponse::responses, "Array of bid Responses");
+    addField("member_id", &AppNexus::BidResponse::memberId, "Bid Request Member ID");
+    addField("auction_id_64", &AppNexus::BidResponse::auctionId, "Auction Id from BidRequest");
+    addField("exclusive", &AppNexus::BidResponse::exclusive, "Should be defaulted to false");
+    addField("no_bid", &AppNexus::BidResponse::noBid, "True if there are no bids available for this tag");
+    addField("price", &AppNexus::BidResponse::price, "Bidding price");
+    addField("userdata_js", &AppNexus::BidResponse::userDataJS, "JS code that will alter the userdata in the cookie");
+    addField("custom_notify_data", &AppNexus::BidResponse::customNotifyData, "Custom data to be passed back with notifications");
+    addField("creative_id", &AppNexus::BidResponse::creativeId, "Creative Id to be passed back if won");
+    addField("creative_code", &AppNexus::BidResponse::creativeCode, "creative code to be used instead or rhe default one in the repo.");
+    addField("click+url", &AppNexus::BidResponse::clickUrl, "Flag marking bid request as a test call");
+    addField("pixel_url", &AppNexus::BidResponse::pixelUrl, "pixel url for thia account");
+    addField("pixel_type", &AppNexus::BidResponse::pixelType, "Type of pixel");    
+}
+
+DefaultDescription<AppNexus::BidResponseRoot>::DefaultDescription()
+{
+    addField("responses", &AppNexus::BidResponseRoot::responses, "Array of bid Responses");
 }
 
 DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()

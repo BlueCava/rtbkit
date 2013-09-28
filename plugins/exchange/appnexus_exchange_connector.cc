@@ -119,7 +119,7 @@ getResponse(const HttpAuctionHandler & connection,
         return getErrorResponse(connection, auction,
                                 current->error + ": " + current->details);
 
-	//AppNexus::BidResponse appnexusBidResponse;
+	//AppNexus::BidResponseRoot appnexusBidResponse;
 	//for(auto idx = 0; idx < current.responses.size(); ++idx)	{
 
 	//	appnexusBidResponse.responses.emplace_back();
@@ -145,7 +145,7 @@ getResponse(const HttpAuctionHandler & connection,
 	//	}
 	//}
 
- //   static Datacratic::DefaultDescription<AppNexus::BidResponse> desc;
+ //   static Datacratic::DefaultDescription<AppNexus::BidResponseRoot> desc;
  //   std::ostringstream stream;
  //   StreamJsonPrintingContext context(stream);
  //   desc.printJsonTyped(&appnexusBidResponse, context);    

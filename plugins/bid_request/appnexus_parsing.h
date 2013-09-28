@@ -94,14 +94,14 @@ namespace Datacratic {
   };
 
   template<>
-  struct DefaultDescription<AppNexus::Response>
-    : public StructureDescription<AppNexus::Response> {
+  struct DefaultDescription<AppNexus::BidResponse>
+    : public StructureDescription<AppNexus::BidResponse> {
     DefaultDescription();
   };
 
   template<>
-  struct DefaultDescription<AppNexus::BidResponse>
-    : public StructureDescription<AppNexus::BidResponse> {
+  struct DefaultDescription<AppNexus::BidResponseRoot>
+    : public StructureDescription<AppNexus::BidResponseRoot> {
     DefaultDescription();
   };
 
