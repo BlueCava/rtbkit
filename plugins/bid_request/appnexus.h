@@ -238,11 +238,11 @@ struct Response {
 	Utf8String clickUrl;
 	Utf8String pixelUrl;
 	Utf8String pixelType;
-}
+};
 
 struct BidResponse {
 	vector<Response> responses;
-}
+};
 
 struct NotifyTag {
 	Id id;
@@ -252,7 +252,7 @@ struct NotifyTag {
 	Id creativeId;
 	TaggedDouble pricePaid;
 	string customNotifyData;
-}
+};
 
 struct NotifyResponse {
 	string result;
@@ -260,7 +260,7 @@ struct NotifyResponse {
 	Id errorId;
 	string error;
 	string customNotifyData;
-}
+};
 
 struct NotifyRequest {
 	string timestamp;
@@ -270,11 +270,11 @@ struct NotifyRequest {
 	Id errorId;
 	vector<NotifyTag> tags;
 	vector<NotifyResponse> responses;
-}
+};
 
 struct NotifyRequestRoot {
 	vector<NotifyRequest> requests;
-}
+};
 
   namespace ANHelpers {
     // TODO Implement validation using these constants pulled from the AN Bid Request spec
