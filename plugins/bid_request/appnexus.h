@@ -256,7 +256,7 @@ struct NotifyTag {
 
 struct NotifyResponse {
 	string result;
-	TaggedDOuble priceBid;
+	TaggedDouble priceBid;
 	Id errorId;
 	string error;
 	string customNotifyData;

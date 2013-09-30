@@ -308,7 +308,7 @@ DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
 DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()
 {
     addField("id", &AppNexus::NotifyTag::id, "Tag Id");
-    addField("auction_id_64", &AppNexus::NotifyTag::auctionId, "Auction Id from BidRequest");
+    addField("auction_id_64", &AppNexus::NotifyTag::auctionId64, "Auction Id from BidRequest");
     addField("notify_type", &AppNexus::NotifyTag::notifyType, "Notification Type (kept, sold, won, lost, default, pending)");
     addField("member_id", &AppNexus::NotifyTag::memberId, "Member Id");
     addField("creative_id", &AppNexus::NotifyTag::creativeId, "Creative Id");
