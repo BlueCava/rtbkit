@@ -119,38 +119,39 @@ getResponse(const HttpAuctionHandler & connection,
         return getErrorResponse(connection, auction,
                                 current->error + ": " + current->details);
 
-	AppNexus::BidResponse appnexusBidResponse;
-	for(auto idx = 0; idx < current.responses.size(); ++idx)	{
+	//AppNexus::BidResponse appnexusBidResponse;
+	//for(auto idx = 0; idx < current.responses.size(); ++idx)	{
 
-		appnexusBidResponse.responses.emplace_back();
-		auto &bidResponse = appnexusBidResponse.responses.back();
-		bidResponse.memberId = auction.request->ext["memberId"];
-		bidResponse.auctionId = auction.id;
-		bidResponse.exclusive = false;
-		bidResponse.noBid = true;
+	//	appnexusBidResponse.responses.emplace_back();
+	//	auto &bidResponse = appnexusBidResponse.responses.back();
+	//	bidResponse.memberId = auction.request->ext["memberId"];
+	//	bidResponse.auctionId = auction.id;
+	//	bidResponse.exclusive = false;
+	//	bidResponse.noBid = true;
 
-		if (current->hasValidResponse(idx))	{		
-			auto & resp = data->winningResponse(idx);
-			bidResponse.noBid = false;
-			bidResponse.price = USD_CPM(resp.price.maxPrice);			
+	//	if (current->hasValidResponse(idx))	{		
+	//		auto & resp = data->winningResponse(idx);
+	//		bidResponse.noBid = false;
+	//		bidResponse.price = USD_CPM(resp.price.maxPrice);			
 
-			auto respMeta = Json::parse(resp.meta);
-			bidResponse.creativeId = respMeta["creativeId"].asString();
-			bidResponse.pixelUrl = respMeta["pixelUrl"].asString();
-			bidResponse.pixelType = respMeta["pixelType"].asString();
+	//		auto respMeta = Json::parse(resp.meta);
+	//		bidResponse.creativeId = respMeta["creativeId"].asString();
+	//		bidResponse.pixelUrl = respMeta["pixelUrl"].asString();
+	//		bidResponse.pixelType = respMeta["pixelType"].asString();
 
-			//TODO: might be useful to set data on AppNexus cookies.
-			//bidResponse.userDataJS = "";
-			//bidResponse.customNotifyData = "";
-		}
-	}
+	//		//TODO: might be useful to set data on AppNexus cookies.
+	//		//bidResponse.userDataJS = "";
+	//		//bidResponse.customNotifyData = "";
+	//	}
+	//}
 
-    static Datacratic::DefaultDescription<AppNexus::BidResponse> desc;
-    std::ostringstream stream;
-    StreamJsonPrintingContext context(stream);
-    desc.printJsonTyped(&appnexusBidResponse, context);    
+ //   static Datacratic::DefaultDescription<AppNexus::BidResponse> desc;
+ //   std::ostringstream stream;
+ //   StreamJsonPrintingContext context(stream);
+ //   desc.printJsonTyped(&appnexusBidResponse, context);    
 
-    return HttpResponse(200, "application/json", stream.str());
+ //   return HttpResponse(200, "application/json", stream.str());
+	return HttpResponse(200, "application/json", "stream.str()");
 }
 
 HttpResponse
