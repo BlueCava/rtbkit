@@ -227,14 +227,14 @@ namespace AppNexus {
   };
 
 struct BidResponse {
-	Id memberId;
+	TaggedInt64 memberId;
 	TaggedInt64 auctionId;
 	TaggedBool exclusive;
 	TaggedBool noBid;
 	TaggedDouble price;
 	Utf8String userDataJS;
 	Utf8String customNotifyData;
-	Id creativeId;
+	TaggedInt64 creativeId;
 	Utf8String creativeCode;
 	Utf8String clickUrl;
 	Utf8String pixelUrl;
@@ -249,8 +249,8 @@ struct NotifyTag {
 	Id id;
 	TaggedInt64 auctionId64;
 	string notifyType;
-	Id memberId;
-	Id creativeId;
+	TaggedInt64 memberId;
+	TaggedInt64 creativeId;
 	TaggedDouble pricePaid;
 	string customNotifyData;
 };
@@ -264,7 +264,7 @@ struct NotifyResponse {
 };
 
 struct NotifyRequest {
-	string timestamp;
+	TaggedDouble timestamp;
 	TaggedInt64 userId64;
 	TaggedBool fail;
 	string error;

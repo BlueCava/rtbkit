@@ -7,6 +7,9 @@
 */
 
 #include "appnexus_adserver_connector.h"
+#include "../bid_request/appnexus.h"
+#include "../bid_request/appnexus_parsing.h"
+#include "rtbkit/common/json_holder.h"
 
 
 using namespace RTBKIT;
@@ -56,15 +59,21 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 		const HttpHeader & header,
 		const Json::Value & json, 
 		const std::string & jsonStr) {
-	
+
+	StructuredJsonParsingContext jsonContext(jsonStr);
 	AppNexus::NotifyRequestRoot notifyRoot;
     Datacratic::DefaultDescription<AppNexus::NotifyRequestRoot> desc;
     desc.parseJson(&notifyRoot, jsonContext);
 
 	auto& notifyRequest = notifyRoot.requests.front();
 
+	Date timestamp = Date::fromSecondsSinceEpoch(notifyRequest.timestamp.val);
+	AccountKey accountKey;
+	UserIds userIds;
+	//notifyRequest.userId64
+
 	for(auto& tag : notifyRequest.tags)
-		publishWin(tag.auctionId64, tag.creativeId, tag.pricePaid, notifyRequest.timestamp, Json::parse(tag.customNotifyData), notifyRequest.userId64, "", notifyRequest.timestamp); 
+		publishWin(Id(tag.auctionId64.val), Id(tag.creativeId.val), USD_CPM(tag.pricePaid.val), timestamp, Json::parse(tag.customNotifyData), userIds, accountKey, timestamp); 
 }
 
 namespace {
