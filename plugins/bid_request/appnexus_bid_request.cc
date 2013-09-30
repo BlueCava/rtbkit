@@ -184,6 +184,9 @@ fromAppNexus(const AppNexus::BidRequest & req,
       impression.banner->pos.val = position.val;
       bidRequest->imp.emplace_back(std::move(impression));
     }
+
+	//Add memberId to "ext" property
+	bidRequest->ext["memberId"] = req.members.front().id.toInt();
     //==========================================================================
 
     /*
