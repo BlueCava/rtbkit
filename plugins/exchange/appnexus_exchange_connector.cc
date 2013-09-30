@@ -119,28 +119,38 @@ getResponse(const HttpAuctionHandler & connection,
         return getErrorResponse(connection, auction,
                                 current->error + ": " + current->details);
 
-    /*
-    AppNexus::BidResponse response;
-    response.id = auction.id;
+	AppNexus::BidResponse appnexusBidResponse;
+	for(auto idx = 0; idx < current.responses.size(); ++idx)	{
 
-    // Create a spot for each of the bid responses
-    for (unsigned spotNum = 0; spotNum < current->responses.size(); ++spotNum) {
-        if (!current->hasValidResponse(spotNum))
-            continue;
+		appnexusBidResponse.responses.emplace_back();
+		auto &bidResponse = appnexusBidResponse.responses.back();
+		bidResponse.memberId = auction.request->ext["memberId"];
+		bidResponse.auctionId = auction.id;
+		bidResponse.exclusive = false;
+		bidResponse.noBid = true;
 
-        setBid(auction, spotNum, response);
-    }
+		if (current->hasValidResponse(idx))	{		
+			auto & resp = data->winningResponse(idx);
+			bidResponse.noBid = false;
+			bidResponse.price = USD_CPM(resp.price.maxPrice);			
 
-    if (response.seatbid.empty())
-        return HttpResponse(204, "none", "");
+			auto respMeta = Json::parse(resp.meta);
+			bidResponse.creativeId = respMeta["creativeId"].asString();
+			bidResponse.pixelUrl = respMeta["pixelUrl"].asString();
+			bidResponse.pixelType = respMeta["pixelType"].asString();
+
+			//TODO: might be useful to set data on AppNexus cookies.
+			//bidResponse.userDataJS = "";
+			//bidResponse.customNotifyData = "";
+		}
+	}
 
     static Datacratic::DefaultDescription<AppNexus::BidResponse> desc;
     std::ostringstream stream;
     StreamJsonPrintingContext context(stream);
-    desc.printJsonTyped(&response, context);
-    */
+    desc.printJsonTyped(&appnexusBidResponse, context);    
 
-    return HttpResponse(200, "application/json", "stream.str()");
+    return HttpResponse(200, "application/json", stream.str());
 }
 
 HttpResponse
@@ -148,7 +158,7 @@ AppNexusExchangeConnector::
 getDroppedAuctionResponse(const HttpAuctionHandler & connection,
                           const std::string & reason) const
 {
-    return HttpResponse(204, "application/json", "{}");
+	return HttpResponse(204, "application/json", "{\"bid_response\": {\"no_bid\": true}}");
 }
 
 HttpResponse

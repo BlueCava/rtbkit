@@ -16,36 +16,30 @@
 namespace RTBKIT {
 
 /******************************************************************************/
-/* MOCK AD SERVER CONNECTOR                                                   */
+/* AppNexus AD SERVER CONNECTOR                                                   */
 /******************************************************************************/
 
-/** Basic ad server connector that sits between the stream of wins (received from
-    the exchange) and rest of the stack. Note that this assumes that the incoming
-    message format is from the mock exchange sample.
-
- */
-
-struct MockAdServerConnector : public HttpAdServerConnector
+struct AppNexusAdServerConnector : public HttpAdServerConnector
 {
-    MockAdServerConnector(const std::string& serviceName,
+    AppNexusAdServerConnector(const std::string& serviceName,
                           std::shared_ptr<Datacratic::ServiceProxies> proxies)
         : HttpAdServerConnector(serviceName, proxies),
           publisher(getServices()->zmqContext) {
     }
 
-    MockAdServerConnector(Datacratic::ServiceProxyArguments & args,
+    AppNexusAdServerConnector(Datacratic::ServiceProxyArguments & args,
                           const std::string& serviceName)
         : HttpAdServerConnector(serviceName, args.makeServiceProxies()),
           publisher(getServices()->zmqContext) {
     }
 
-    MockAdServerConnector(std::shared_ptr<ServiceProxies> const & proxies,
+    AppNexusAdServerConnector(std::shared_ptr<ServiceProxies> const & proxies,
                           Json::Value const & json);
 
     void init(int port);
     void start();
     void shutdown();
-    void handleEvent(PostAuctionEvent const & event);
+    void handleNotificationRequests( const HttpHeader & header, const Json::Value & json, const std::string & jsonStr);
 
     /// Generic publishing endpoint to forward wins to anyone registered. Currently, there's only the
     /// router that connects to this.

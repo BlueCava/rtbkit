@@ -93,5 +93,41 @@ namespace Datacratic {
     DefaultDescription();
   };
 
+  template<>
+  struct DefaultDescription<AppNexus::Response>
+    : public StructureDescription<AppNexus::Response> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::BidResponse>
+    : public StructureDescription<AppNexus::BidResponse> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::NotifyTag>
+    : public StructureDescription<AppNexus::NotifyTag> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::NotifyResponse>
+    : public StructureDescription<AppNexus::NotifyResponse> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::NotifyRequest>
+    : public StructureDescription<AppNexus::NotifyRequest> {
+    DefaultDescription();
+  };
+
+  template<>
+  struct DefaultDescription<AppNexus::NotifyRequestRoot>
+    : public StructureDescription<AppNexus::NotifyRequestRoot> {
+    DefaultDescription();
+  };
+
 
 } // namespace Datacratic

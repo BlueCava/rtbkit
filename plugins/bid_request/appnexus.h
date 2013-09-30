@@ -225,6 +225,56 @@ namespace AppNexus {
     AppNexus::BidRequest bidRequest;
     Json::Value unparseable;    ///< Unparseable fields get put here
   };
+struct Response {
+	Id memberId;
+	TaggedInt64 auctionId;
+	TaggedBool exclusive;
+	TaggedBool noBid;
+	TaggedDouble price;
+	Utf8String userDataJS;
+	Utf8String customNotifyData;
+	Id creativeId;
+	Utf8String creativeCode;
+	Utf8String clickUrl;
+	Utf8String pixelUrl;
+	Utf8String pixelType;
+}
+
+struct BidResponse {
+	vector<Response> responses;
+}
+
+struct NotifyTag {
+	Id id;
+	TaggedInt64 auctionId64;
+	string notifyType;
+	Id memberId;
+	Id creativeId;
+	TaggedDouble pricePaid;
+	string customNotifyData;
+}
+
+struct NotifyResponse {
+	string result;
+	TaggedDOuble priceBid;
+	Id errorId;
+	string error;
+	string customNotifyData;
+}
+
+struct NotifyRequest {
+	string timestamp;
+	TaggedInt64 userId64;
+	TaggedBool fail;
+	string error;
+	Id errorId;
+	vector<NotifyTag> tags;
+	vector<NotifyResponse> responses;
+}
+
+struct NotifyRequestRoot {
+	vector<NotifyRequest> requests;
+}
 
   namespace ANHelpers {
     // TODO Implement validation using these constants pulled from the AN Bid Request spec

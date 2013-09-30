@@ -284,6 +284,63 @@ namespace Datacratic {
     addField("unparseable", &AppNexus::Member::unparseable, "Unparseable fields are collected here");
   }
 
+DefaultDescription<AppNexus::Response>::DefaultDescription()
+{
+    addField("member_id", &AppNexus::Response::memberId, "Bid Request Member ID");
+    addField("auction_id_64", &AppNexus::Response::auctionId, "Auction Id from BidRequest");
+    addField("exclusive", &AppNexus::Response::exclusive, "Should be defaulted to false");
+    addField("no_bid", &AppNexus::Response::noBid, "True if there are no bids available for this tag");
+    addField("price", &AppNexus::Response::price, "Bidding price");
+    addField("userdata_js", &AppNexus::Response::userDataJS, "JS code that will alter the userdata in the cookie");
+    addField("custom_notify_data", &AppNexus::Response::customNotifyData, "Custom data to be passed back with notifications");
+    addField("creative_id", &AppNexus::Response::creativeId, "Creative Id to be passed back if won");
+    addField("creative_code", &AppNexus::Response::creativeCode, "creative code to be used instead or rhe default one in the repo.");
+    addField("click+url", &AppNexus::Response::clickUrl, "Flag marking bid request as a test call");
+    addField("pixel_url", &AppNexus::Response::pixelUrl, "pixel url for thia account");
+    addField("pixel_type", &AppNexus::Response::pixelType, "Type of pixel");    
+}
+
+DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
+{
+    addField("responses", &AppNexus::BidResponse::responses, "Array of bid Responses");
+}
+
+DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()
+{
+    addField("id", &AppNexus::NotifyTag::id, "Tag Id");
+    addField("auction_id_64", &AppNexus::NotifyTag::auctionId, "Auction Id from BidRequest");
+    addField("notify_type", &AppNexus::NotifyTag::notifyType, "Notification Type (kept, sold, won, lost, default, pending)");
+    addField("member_id", &AppNexus::NotifyTag::memberId, "Member Id");
+    addField("creative_id", &AppNexus::NotifyTag::creativeId, "Creative Id");
+    addField("price_paid", &AppNexus::NotifyTag::pricePaid, "Bid price");
+    addField("custom_notify_data", &AppNexus::NotifyTag::customNotifyData, "Custom data to be passed back with notifications");    
+}
+
+DefaultDescription<AppNexus::NotifyResponse>::DefaultDescription()
+{
+    addField("result", &AppNexus::NotifyResponse::result, "ok or error");
+    addField("price_bid", &AppNexus::NotifyResponse::priceBid, "Bid price");
+    addField("error_id", &AppNexus::NotifyResponse::errorId, "error id");
+    addField("error", &AppNexus::NotifyResponse::error, "error");
+    addField("custom_notify_data", &AppNexus::NotifyResponse::customNotifyData, "Custom data to be passed back with notifications");    
+}
+
+DefaultDescription<AppNexus::NotifyRequest>::DefaultDescription()
+{
+    addField("timestamp", &AppNexus::NotifyRequest::timestamp, "timestamp");
+    addField("user_id_64", &AppNexus::NotifyRequest::userId64, "The Id of the user");
+	addField("fail", &AppNexus::NotifyRequest::fail, "true if bid response wasn't parsed successfully.");
+    addField("error_id", &AppNexus::NotifyRequest::errorId, "error id");
+    addField("error", &AppNexus::NotifyRequest::error, "error");
+    addField("tags", &AppNexus::NotifyRequest::tags, "list of NotifyTag objects");    
+	addField("responses", &AppNexus::NotifyRequest::responses, "list of NotifyResponse objects");    
+}
+
+DefaultDescription<AppNexus::NotifyRequestRoot>::DefaultDescription()
+{
+    addField("notify_request", &AppNexus::NotifyRequestRoot::requests, "list of NotifyRequest objects");    
+}
+
 
 } // namespace Datacratic
 
