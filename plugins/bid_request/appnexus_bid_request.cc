@@ -97,6 +97,33 @@ fromAppNexus(const AppNexus::BidRequest & req,
     bidRequest->user.reset(user.release());
     // bidRequest->content.reset(content.release());
 
+    // OpenRTB::Publisher
+    std::unique_ptr<OpenRTB::Publisher> publisher1(new OpenRTB::Publisher);
+    std::unique_ptr<OpenRTB::Publisher> publisher2(new OpenRTB::Publisher);
+
+    // OpenRTB::Site
+    std::unique_ptr<OpenRTB::Site> site(new OpenRTB::Site);
+    site->publisher.reset(publisher1.release());
+    site->id = req.tags.front().inventorySourceId;
+
+    // OpenRTB::App
+    std::unique_ptr<OpenRTB::App> app(new OpenRTB::App);
+    app->publisher.reset(publisher2.release());
+
+    // BUSINESS RULE - This is a weak test for "is this an app or a site"
+    //  Can't see a better way to do this in AN, so we see if the Bid has an appId
+    if (req.bidInfo.appId == "") { // It's a 'site' and not an 'app'
+      //site->publisher->id = Id(req.bidInfo.publisherId.val);
+    }
+    else { // It's an 'app' and not a 'site'
+      app->publisher->id = Id(req.bidInfo.publisherId.val);
+    }
+    // But always just statelessy assign appId. If it's empty, no harm
+    app->id = Id(req.bidInfo.appId);
+
+    bidRequest->app.reset(app.release());
+    bidRequest->site.reset(site.release());
+
     // Process multi-tags AppNexus bid_request
     for (auto const& reqTag : req.tags)
     {
@@ -155,34 +182,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
       }
       OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
       impression.banner->pos.val = position.val;
-
-      // OpenRTB::Publisher
-      std::unique_ptr<OpenRTB::Publisher> publisher1(new OpenRTB::Publisher);
-      std::unique_ptr<OpenRTB::Publisher> publisher2(new OpenRTB::Publisher);
-
-      // OpenRTB::Site
-      std::unique_ptr<OpenRTB::Site> site(new OpenRTB::Site);
-      site->publisher.reset(publisher1.release());
-      site->id = reqTag.inventorySourceId;
-
-      // OpenRTB::App
-      std::unique_ptr<OpenRTB::App> app(new OpenRTB::App);
-      app->publisher.reset(publisher2.release());
-
-      // BUSINESS RULE - This is a weak test for "is this an app or a site"
-      //  Can't see a better way to do this in AN, so we see if the Bid has an appId
-      if (req.bidInfo.appId == "") { // It's a 'site' and not an 'app'
-        //site->publisher->id = Id(req.bidInfo.publisherId.val);
-      }
-      else { // It's an 'app' and not a 'site'
-        app->publisher->id = Id(req.bidInfo.publisherId.val);
-      }
-      // But always just statelessy assign appId. If it's empty, no harm
-      app->id = Id(req.bidInfo.appId);
-
       bidRequest->imp.emplace_back(std::move(impression));
-      bidRequest->app.reset(app.release());
-      bidRequest->site.reset(site.release());
     }
     //==========================================================================
 
