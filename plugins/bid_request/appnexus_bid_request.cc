@@ -91,11 +91,12 @@ fromAppNexus(const AppNexus::BidRequest & req,
 
     // =========================================================================
     // BidRequest
-    std::unique_ptr<BidRequest> bidRequest(new BidRequest);
+	std::unique_ptr<BidRequest> bidRequest(new BidRequest);
+	bidRequest->timestamp = Date::parse_date_time(req.timestamp, "%y-%m-%d", "%H:%M:%S");
     bidRequest->timeAvailableMs = req.bidderTimeoutMs.val;
     bidRequest->device.reset(device.release());
     bidRequest->user.reset(user.release());
-	bidRequest->auctionId = Id(req.tags.front().auctionId64.val);
+	bidRequest->auctionId = Id(req.tags.front().auctionId64.val);	
     // bidRequest->content.reset(content.release());
 
     // OpenRTB::Publisher
@@ -129,7 +130,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     for (auto const& reqTag : req.tags)
     {
       // OpenRTB::Impression
-      OpenRTB::Impression impression;
+      OpenRTB::AdSpot impression;
       std::unique_ptr<OpenRTB::Banner> banner(new OpenRTB::Banner);
       impression.banner.reset(banner.release());
       // TODO CONFIRM THIS ASSUMPTION
@@ -180,6 +181,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
         int h = boost::lexical_cast<int>(adSizePair.substr(splitIdx + 1));
         impression.banner->w.push_back(w);
         impression.banner->h.push_back(h);
+		impression.formats.push_back(Format(w,h));
       }
       OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
       impression.banner->pos.val = position.val;
