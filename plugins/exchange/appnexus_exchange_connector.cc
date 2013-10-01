@@ -148,9 +148,11 @@ getResponse(const HttpAuctionHandler & connection,
     static Datacratic::DefaultDescription<AppNexus::BidResponseRoot> desc;
     std::ostringstream stream;
     StreamJsonPrintingContext context(stream);
-    desc.printJsonTyped(&appnexusBidResponse, context);    
+    desc.printJsonTyped(&appnexusBidResponse, context);
 
-    return HttpResponse(200, "application/json", stream.str());
+	string strResponse = "{\"bid_response\": " + stream.str() + "}";
+
+	return HttpResponse(200, "application/json", strResponse);
 }
 
 HttpResponse

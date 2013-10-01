@@ -95,6 +95,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     bidRequest->timeAvailableMs = req.bidderTimeoutMs.val;
     bidRequest->device.reset(device.release());
     bidRequest->user.reset(user.release());
+	bidRequest->auctionId = Id(req.tags.front().auctionId64.val);
     // bidRequest->content.reset(content.release());
 
     // OpenRTB::Publisher
