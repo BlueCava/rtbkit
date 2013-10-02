@@ -152,8 +152,6 @@ getResponse(const HttpAuctionHandler & connection,
 
 	string strResponse = "{\"bid_response\": " + stream.str() + "}";
 
-	std::cout << strResponse << std::endl;
-
 	return HttpResponse(200, "application/json", strResponse);
 }
 
