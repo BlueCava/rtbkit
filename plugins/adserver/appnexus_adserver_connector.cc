@@ -58,22 +58,29 @@ void AppNexusAdServerConnector::shutdown() {
 void AppNexusAdServerConnector::handleNotificationRequests(
 		const HttpHeader & header,
 		const Json::Value & json, 
-		const std::string & jsonStr) {
-
-	StructuredJsonParsingContext jsonContext(jsonStr);
+		const std::string & jsonStr) {	
+	StructuredJsonParsingContext jsonContext(json);
 	AppNexus::NotifyRequestRoot notifyRoot;
-    Datacratic::DefaultDescription<AppNexus::NotifyRequestRoot> desc;
-    desc.parseJson(&notifyRoot, jsonContext);
+	DefaultDescription<AppNexus::NotifyRequestRoot> desc;
+	desc.parseJson(&notifyRoot, jsonContext);
 
-	auto& notifyRequest = notifyRoot.requests.front();
+	auto& notifyRequest = notifyRoot.notifyRequest;
 
-	Date timestamp = Date::fromSecondsSinceEpoch(notifyRequest.timestamp.val);
+	Date timestamp = Date::parse_date_time(notifyRequest.timestamp, "%y-%m-%d", "%H:%M:%S");
 	AccountKey accountKey;
-	UserIds userIds;
-	//notifyRequest.userId64
-
-	for(auto& tag : notifyRequest.tags)
-		publishWin(Id(tag.auctionId64.val), Id(tag.creativeId.val), USD_CPM(tag.pricePaid.val), timestamp, Json::parse(tag.customNotifyData), userIds, accountKey, timestamp); 
+	
+	for(auto& tag : notifyRequest.tags) {
+		UserIds userIds;
+		userIds.add(Id(tag.userId64.val), ID_EXCHANGE);
+		publishWin(Id(tag.auctionId64.val), 
+				   Id(tag.creativeId.val), 
+				   USD_CPM(tag.pricePaid.val), 
+				   timestamp, 
+				   tag.customNotifyData.empty() ? Json::Value() : Json::parse(tag.customNotifyData), 
+				   userIds, 
+				   accountKey, 
+				   timestamp); 	
+	}
 }
 
 namespace {
@@ -81,7 +88,7 @@ namespace {
 struct AtInit {
     AtInit()
     {
-        AdServerConnector::registerFactory("AppNexus", [](std::shared_ptr<ServiceProxies> const & proxies,
+        AdServerConnector::registerFactory("appnexus", [](std::shared_ptr<ServiceProxies> const & proxies,
                                                       Json::Value const & json) {
             auto server = new AppNexusAdServerConnector(proxies, json);
 

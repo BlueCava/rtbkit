@@ -302,23 +302,32 @@ DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
 
 DefaultDescription<AppNexus::BidResponseRoot>::DefaultDescription()
 {
-    addField("responses", &AppNexus::BidResponseRoot::responses, "Array of bid Responses");
+	addField("responses", &AppNexus::BidResponseRoot::responses, "Array of bid Responses");
 }
 
 DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()
 {
-    addField("id", &AppNexus::NotifyTag::id, "Tag Id");
+	onUnknownField = [=] (AppNexus::NotifyTag* br, JsonParsingContext & context)
+    {		
+    };
+
+	addField("id", &AppNexus::NotifyTag::id, "Tag Id");
+	addField("user_id_64", &AppNexus::NotifyTag::userId64, "The Id of the user");
     addField("auction_id_64", &AppNexus::NotifyTag::auctionId64, "Auction Id from BidRequest");
     addField("notify_type", &AppNexus::NotifyTag::notifyType, "Notification Type (kept, sold, won, lost, default, pending)");
     addField("member_id", &AppNexus::NotifyTag::memberId, "Member Id");
     addField("creative_id", &AppNexus::NotifyTag::creativeId, "Creative Id");
     addField("price_paid", &AppNexus::NotifyTag::pricePaid, "Bid price");
-    addField("custom_notify_data", &AppNexus::NotifyTag::customNotifyData, "Custom data to be passed back with notifications");    
+    addField("custom_notify_data", &AppNexus::NotifyTag::customNotifyData, "Custom data to be passed back with notifications");    	
 }
 
 DefaultDescription<AppNexus::NotifyResponse>::DefaultDescription()
 {
-    addField("result", &AppNexus::NotifyResponse::result, "ok or error");
+	onUnknownField = [=] (AppNexus::NotifyResponse* br, JsonParsingContext & context)
+    {		
+    };
+
+	addField("result", &AppNexus::NotifyResponse::result, "ok or error");
     addField("price_bid", &AppNexus::NotifyResponse::priceBid, "Bid price");
     addField("error_id", &AppNexus::NotifyResponse::errorId, "error id");
     addField("error", &AppNexus::NotifyResponse::error, "error");
@@ -327,18 +336,27 @@ DefaultDescription<AppNexus::NotifyResponse>::DefaultDescription()
 
 DefaultDescription<AppNexus::NotifyRequest>::DefaultDescription()
 {
-    addField("timestamp", &AppNexus::NotifyRequest::timestamp, "timestamp");
+	onUnknownField = [=] (AppNexus::NotifyRequest* br, JsonParsingContext & context)
+    {		
+    };
+
+	addField("timestamp", &AppNexus::NotifyRequest::timestamp, "timestamp");
     addField("user_id_64", &AppNexus::NotifyRequest::userId64, "The Id of the user");
 	addField("fail", &AppNexus::NotifyRequest::fail, "true if bid response wasn't parsed successfully.");
     addField("error_id", &AppNexus::NotifyRequest::errorId, "error id");
     addField("error", &AppNexus::NotifyRequest::error, "error");
+	addField("response_time_ms", &AppNexus::NotifyRequest::responseTimeMs, "response_time_ms");
     addField("tags", &AppNexus::NotifyRequest::tags, "list of NotifyTag objects");    
 	addField("responses", &AppNexus::NotifyRequest::responses, "list of NotifyResponse objects");    
 }
 
 DefaultDescription<AppNexus::NotifyRequestRoot>::DefaultDescription()
 {
-    addField("notify_request", &AppNexus::NotifyRequestRoot::requests, "list of NotifyRequest objects");    
+	onUnknownField = [=] (AppNexus::NotifyRequestRoot* br, JsonParsingContext & context)
+    {		
+    };
+
+    addField("notify_request", &AppNexus::NotifyRequestRoot::notifyRequest, "NotifyRequest object");    
 }
 
 

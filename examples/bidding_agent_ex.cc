@@ -101,33 +101,32 @@ struct FixedPriceBiddingAgent :
         config.creatives.push_back(Creative::sampleWS);
         config.creatives.push_back(Creative::sampleBB);
 
-
-        // Indicate to the router that we want our bid requests to be augmented
+		// Indicate to the router that we want our bid requests to be augmented
         // with our frequency cap augmentor example.
         {
-            AugmentationConfig augConfig;
+            //AugmentationConfig augConfig;
 
-            // Name of the requested augmentor.
-            augConfig.name = "frequency-cap-ex";
+            //// Name of the requested augmentor.
+            //augConfig.name = "frequency-cap-ex";
 
-            // If the augmentor was unable to augment our bid request then it
-            // should be filtered before it makes it to our agent.
-            augConfig.required = true;
+            //// If the augmentor was unable to augment our bid request then it
+            //// should be filtered before it makes it to our agent.
+            //augConfig.required = false;
 
-            // Config parameter sent used by the augmentor to determine which
-            // tag to set.
-            augConfig.config = Json::Value(42);
+            //// Config parameter sent used by the augmentor to determine which
+            //// tag to set.
+            //augConfig.config = Json::Value(42);
 
-            // Instruct to router to filter out all bid requests who have not
-            // been tagged by our frequency cap augmentor.
-            augConfig.filters.include.push_back("pass-frequency-cap-ex");
+            //// Instruct to router to filter out all bid requests who have not
+            //// been tagged by our frequency cap augmentor.
+            //augConfig.filters.include.push_back("pass-frequency-cap-ex");
 
-            config.addAugmentation(augConfig);
+            //config.addAugmentation(augConfig);
         }
 
         // Configures the agent to only receive 10% of the bid request traffic
         // that matches its filters.
-        config.bidProbability = 0.1;
+        config.bidProbability = 1;
 
         // Tell the world about our config. We can change the configuration of
         // an agent at any time by calling this function.
@@ -146,7 +145,7 @@ struct FixedPriceBiddingAgent :
             double timeLeftMs,
             const Json::Value & augmentations)
     {
-        for (Bid& bid : bids) {
+		for (Bid& bid : bids) {
 
             // In our example, all our creatives are of the different sizes so
             // there should only ever be one biddable creative. Note that that
@@ -166,9 +165,12 @@ struct FixedPriceBiddingAgent :
             bid.bid(availableCreative, MicroUSD(100));
         }
 
-        // A value that will be passed back to us when we receive the result of
+		// A value that will be passed back to us when we receive the result of
         // our bid.
-        Json::Value metadata = 42;
+        Json::Value metadata;
+		metadata["creativeId"] = 1234567;
+		metadata["pixelUrl"] = "http://www.bluecava.com/";
+		metadata["pixelType"] = "image";
 
         // Send our bid back to the agent.
         doBid(id, bids, metadata);

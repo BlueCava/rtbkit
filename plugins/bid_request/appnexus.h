@@ -32,6 +32,11 @@ namespace AppNexus {
   using OpenRTB::TaggedInt64;
   using OpenRTB::TaggedDouble;
 
+  struct AppNexusBool {
+	  AppNexusBool() : val(0) {}
+	  int val;
+  };
+
 
   struct AdPosition: public OpenRTB::TaggedEnum<AdPosition, 0> {
     enum Vals {
@@ -229,8 +234,8 @@ namespace AppNexus {
 struct BidResponse {
 	TaggedInt64 memberId;
 	TaggedInt64 auctionId;
-	TaggedBool exclusive;
-	TaggedBool noBid;
+	AppNexusBool exclusive;
+	AppNexusBool noBid;
 	TaggedDouble price;
 	Utf8String userDataJS;
 	Utf8String customNotifyData;
@@ -252,6 +257,7 @@ struct NotifyTag {
 	TaggedInt64 memberId;
 	TaggedInt64 creativeId;
 	TaggedDouble pricePaid;
+	TaggedInt64 userId64;
 	string customNotifyData;
 };
 
@@ -264,17 +270,18 @@ struct NotifyResponse {
 };
 
 struct NotifyRequest {
-	TaggedDouble timestamp;
+	string timestamp;
 	TaggedInt64 userId64;
 	TaggedBool fail;
 	string error;
 	Id errorId;
+	TaggedInt responseTimeMs;
 	vector<NotifyTag> tags;
 	vector<NotifyResponse> responses;
 };
 
 struct NotifyRequestRoot {
-	vector<NotifyRequest> requests;
+	NotifyRequest notifyRequest;
 };
 
   namespace ANHelpers {

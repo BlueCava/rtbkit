@@ -1,0 +1,15 @@
+{
+    "workers": [
+        {
+            "thread": 1,
+            "bids": {
+                "type": "appnexus",
+                "url": "localhost:12400"
+            },
+            "wins": {
+                "type": "appnexus",
+                "url": "localhost:12401"
+            }
+        }
+    ]
+}

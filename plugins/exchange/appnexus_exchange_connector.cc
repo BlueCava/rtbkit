@@ -126,12 +126,12 @@ getResponse(const HttpAuctionHandler & connection,
 		auto &bidResponse = appnexusBidResponse.responses.back();
 		bidResponse.memberId.val = auction.request->ext["memberId"].asInt();
 		bidResponse.auctionId.val = auction.id.toInt();
-		bidResponse.exclusive = false;
-		bidResponse.noBid = true;
+		bidResponse.exclusive.val = false;
+		bidResponse.noBid.val = true;
 
 		if (current->hasValidResponse(idx))	{		
 			auto & resp = current->winningResponse(idx);
-			bidResponse.noBid = false;
+			bidResponse.noBid.val = false;
 			bidResponse.price.val = USD_CPM(resp.price.maxPrice);			
 
 			auto respMeta = Json::parse(resp.meta);
@@ -151,6 +151,8 @@ getResponse(const HttpAuctionHandler & connection,
     desc.printJsonTyped(&appnexusBidResponse, context);
 
 	string strResponse = "{\"bid_response\": " + stream.str() + "}";
+
+	std::cout << strResponse << std::endl;
 
 	return HttpResponse(200, "application/json", strResponse);
 }

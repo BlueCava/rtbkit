@@ -13,7 +13,30 @@ using std::string;
 
 
 namespace Datacratic {
+  
+  template<>
+  struct DefaultDescription<AppNexus::AppNexusBool>
+    : public ValueDescriptionI<AppNexus::AppNexusBool, ValueKind::BOOLEAN> {
 
+    DefaultDescription()
+    {
+    }
+
+    virtual void parseJsonTyped(AppNexus::AppNexusBool * val,
+                                JsonParsingContext & context) const
+    {
+		if (context.isBool())
+            val->val = context.expectBool();
+        else 
+			val->val = context.expectInt();
+	}
+
+	virtual void printJsonTyped(const AppNexus::AppNexusBool * val,
+                                JsonPrintingContext & context) const
+    {
+        context.writeBool(val->val);
+    }
+  };
 
   template<>
   struct DefaultDescription<AppNexus::AdPosition>
@@ -128,6 +151,5 @@ namespace Datacratic {
     : public StructureDescription<AppNexus::NotifyRequestRoot> {
     DefaultDescription();
   };
-
 
 } // namespace Datacratic
