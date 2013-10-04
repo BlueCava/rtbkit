@@ -188,8 +188,16 @@ fromAppNexus(const AppNexus::BidRequest & req,
       bidRequest->imp.emplace_back(std::move(impression));
     }
 
+	//Update RtbKit needed properties
+	bidRequest->provider = provider;
+    bidRequest->exchange = (exchange.empty() ? provider : exchange);
+	bidRequest->language = bidRequest->device->language;
+    bidRequest->userAgent = bidRequest->device->ua;
+	bidRequest->ipAddress = bidRequest->device->ip;
+	bidRequest->userIds.add(bidRequest->user->id, ID_EXCHANGE);
+
 	//Add memberId to "ext" property
-	bidRequest->ext["memberId"] = req.members.front().id.toInt();
+	bidRequest->ext["memberId"] = req.members.size() ? req.members.front().id.toInt() : 4156;
     //==========================================================================
 
     /*

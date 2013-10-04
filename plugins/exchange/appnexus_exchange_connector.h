@@ -56,6 +56,11 @@ struct AppNexusExchangeConnector : public HttpExchangeConnector {
     getErrorResponse(const HttpAuctionHandler & connection,
                      const Auction & auction,
                      const std::string & errorMessage) const;
+
+	virtual void
+	handleUnknownRequest(HttpAuctionHandler & connection,
+						 const HttpHeader & header,
+						 const std::string & payload) const;
 };
 
 

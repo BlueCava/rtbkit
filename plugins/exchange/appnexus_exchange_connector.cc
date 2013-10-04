@@ -77,11 +77,9 @@ parseBidRequest(HttpAuctionHandler & connection,
 {
     std::shared_ptr<BidRequest> result;
 
-    // Check for JSON content-type
-    if (header.contentType != "application/json") {
-        connection.sendErrorResponse("non-JSON request");
-        return result;
-    }
+#if 0
+	std::cout << "AppNexusExchangeConnector::parseBidRequest " << payload.c_str() << std::endl;
+#endif    
 
     auto name = exchangeNameString(); 
 
@@ -152,6 +150,10 @@ getResponse(const HttpAuctionHandler & connection,
 
 	string strResponse = "{\"bid_response\": " + stream.str() + "}";
 
+#if 0
+	std::cout << strResponse << std::endl;
+#endif
+
 	return HttpResponse(200, "application/json", strResponse);
 }
 
@@ -172,6 +174,40 @@ getErrorResponse(const HttpAuctionHandler & connection,
     Json::Value response;
     response["error"] = errorMessage;
     return HttpResponse(400, response);
+}
+
+void
+AppNexusExchangeConnector::
+handleUnknownRequest(HttpAuctionHandler & connection,
+                     const HttpHeader & header,
+                     const std::string & payload) const
+{
+#if 0
+	if (header.resource == "/ready") {
+        connection.putResponseOnWire(HttpResponse(200, "text/plain", "1"));
+        return;
+    }
+
+	std::cout << "Appnexus::handleUnknownRequest" << std::endl;
+
+	std::cout << "[verb]: [" << header.verb << "]" << std::endl;
+	std::cout << "[resource]: [" << header.resource << "]" << std::endl;
+	std::cout << "[version]: [" << header.version << "]" << std::endl;
+	std::cout << "[contentType]: [" << header.contentType << "]" << std::endl;
+	std::cout << "[contentLength]: [" << header.contentLength << "]" << std::endl;
+	std::cout << "[knownData]: [" << header.knownData << "]" << std::endl;
+	std::cout << "[queryParams]: [" << header.queryParams.uriEscaped() << "]" << std::endl;
+
+	for (auto iter = header.headers.begin(); iter != header.headers.end(); ++iter) {
+		std::cout << "[" << iter->first << "]: [" << iter->second << "]" << std::endl;
+	}
+
+	connection.sendErrorResponse("unknown resource " + header.resource);
+
+	return;
+#endif
+
+	HttpExchangeConnector::handleUnknownRequest(connection, header, payload);
 }
 
 } // namespace RTBKIT
