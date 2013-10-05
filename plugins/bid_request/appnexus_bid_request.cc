@@ -187,6 +187,9 @@ fromAppNexus(const AppNexus::BidRequest & req,
       impression.banner->pos.val = position.val;
       bidRequest->imp.emplace_back(std::move(impression));
     }
+	vector<string> segmentIds;
+	for(auto& segment : req.bidInfo.segments)
+		segmentIds.push_back(segment.id.toString());
 
 	//Update RtbKit needed properties
 	bidRequest->provider = provider;
@@ -195,6 +198,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     bidRequest->userAgent = bidRequest->device->ua;
 	bidRequest->ipAddress = bidRequest->device->ip;
 	bidRequest->userIds.add(bidRequest->user->id, ID_EXCHANGE);
+	bidRequest->segments.addStrings(bidRequest->exchange, segmentIds);
 
 	//Add memberId to "ext" property
 	bidRequest->ext["memberId"] = req.members.size() ? req.members.front().id.toInt() : 4156;
