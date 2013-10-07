@@ -539,12 +539,17 @@ struct ShadowAccount {
     /* SPEND AUTHORIZATION                                                   */
     /*************************************************************************/
 
+	bool hasEnoughBalance(Amount amount)
+    {
+        return balance.hasAvailable(amount);
+    }
+
     bool authorizeBid(const std::string & item,
                       Amount amount)
     {
         checkInvariants();
 
-        if (!balance.hasAvailable(amount))
+        if (!hasEnoughBalance(amount))
             return false;  // no budget balance
 
         attachBid(item, amount);
