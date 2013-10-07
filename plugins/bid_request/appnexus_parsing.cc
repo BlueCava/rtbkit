@@ -116,7 +116,7 @@ namespace Datacratic {
     addField("url", &AppNexus::BidInfo::url, "Host URL of ad unit. 'page' where ad is running");
     addField("domain", &AppNexus::BidInfo::domain, "Domain of host URL of ad unit");
     //addField("inventory_class", &AppNexus::BidInfo::inventoryClass, "DEPRECATED");
-    //addField("inventory_audits", &AppNexus::BidInfo::inventoryAudits, "Array of AN InventoryAudit objects");
+    addField("inventory_audits", &AppNexus::BidInfo::inventoryAudits, "Array of AN InventoryAudit objects");
     addField("within_iframe", &AppNexus::BidInfo::withinIframe, "Flag indicating whether Address unit is contained in iFrame");
     addField("publisher_id", &AppNexus::BidInfo::publisherId, "AN id of publisher of page that is host URL of ad unit");
     addField("is_secure", &AppNexus::BidInfo::isSecure, "Flag indicating whether protocol of ad call is secure (https)");
@@ -208,7 +208,7 @@ namespace Datacratic {
     addField("auditor_member_id", &AppNexus::InventoryAudit::auditorMemberId, "AN member Id");
     addField("intended_audience", &AppNexus::InventoryAudit::intendedAudience, "AN enum set of audience textual codes");
     addField("inventory_attributes", &AppNexus::InventoryAudit::inventoryAttributes, "Integer codes from AN inventory attribute service");
-    addField("content_categories", &AppNexus::InventoryAudit::contentCategories, "Conent codes from AN content attribute service");
+    addField("content_categories", &AppNexus::InventoryAudit::contentCategories, "Content codes from AN content attribute service");
     addField("unparseable", &AppNexus::InventoryAudit::unparseable, "Unparseable fields are collected here");
   }
 
@@ -284,8 +284,8 @@ namespace Datacratic {
     addField("unparseable", &AppNexus::Member::unparseable, "Unparseable fields are collected here");
   }
 
-DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
-{
+  DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
+  {
     addField("member_id", &AppNexus::BidResponse::memberId, "Bid Request Member ID");
     addField("auction_id_64", &AppNexus::BidResponse::auctionId, "Auction Id from BidRequest");
     addField("exclusive", &AppNexus::BidResponse::exclusive, "Should be defaulted to false");
@@ -298,66 +298,66 @@ DefaultDescription<AppNexus::BidResponse>::DefaultDescription()
     addField("click+url", &AppNexus::BidResponse::clickUrl, "Flag marking bid request as a test call");
     addField("pixel_url", &AppNexus::BidResponse::pixelUrl, "pixel url for thia account");
     addField("pixel_type", &AppNexus::BidResponse::pixelType, "Type of pixel");    
-}
+  }
 
-DefaultDescription<AppNexus::BidResponseRoot>::DefaultDescription()
-{
-	addField("responses", &AppNexus::BidResponseRoot::responses, "Array of bid Responses");
-}
+  DefaultDescription<AppNexus::BidResponseRoot>::DefaultDescription()
+  {
+    addField("responses", &AppNexus::BidResponseRoot::responses, "Array of bid Responses");
+  }
 
-DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()
-{
-	onUnknownField = [=] (AppNexus::NotifyTag* br, JsonParsingContext & context)
+  DefaultDescription<AppNexus::NotifyTag>::DefaultDescription()
+  {
+    onUnknownField = [=] (AppNexus::NotifyTag* br, JsonParsingContext & context)
     {		
     };
 
-	addField("id", &AppNexus::NotifyTag::id, "Tag Id");
-	addField("user_id_64", &AppNexus::NotifyTag::userId64, "The Id of the user");
+    addField("id", &AppNexus::NotifyTag::id, "Tag Id");
+    addField("user_id_64", &AppNexus::NotifyTag::userId64, "The Id of the user");
     addField("auction_id_64", &AppNexus::NotifyTag::auctionId64, "Auction Id from BidRequest");
     addField("notify_type", &AppNexus::NotifyTag::notifyType, "Notification Type (kept, sold, won, lost, default, pending)");
     addField("member_id", &AppNexus::NotifyTag::memberId, "Member Id");
     addField("creative_id", &AppNexus::NotifyTag::creativeId, "Creative Id");
     addField("price_paid", &AppNexus::NotifyTag::pricePaid, "Bid price");
     addField("custom_notify_data", &AppNexus::NotifyTag::customNotifyData, "Custom data to be passed back with notifications");    	
-}
+  }
 
-DefaultDescription<AppNexus::NotifyResponse>::DefaultDescription()
-{
-	onUnknownField = [=] (AppNexus::NotifyResponse* br, JsonParsingContext & context)
+  DefaultDescription<AppNexus::NotifyResponse>::DefaultDescription()
+  {
+    onUnknownField = [=] (AppNexus::NotifyResponse* br, JsonParsingContext & context)
     {		
     };
 
-	addField("result", &AppNexus::NotifyResponse::result, "ok or error");
+    addField("result", &AppNexus::NotifyResponse::result, "ok or error");
     addField("price_bid", &AppNexus::NotifyResponse::priceBid, "Bid price");
     addField("error_id", &AppNexus::NotifyResponse::errorId, "error id");
     addField("error", &AppNexus::NotifyResponse::error, "error");
     addField("custom_notify_data", &AppNexus::NotifyResponse::customNotifyData, "Custom data to be passed back with notifications");    
-}
+  }
 
-DefaultDescription<AppNexus::NotifyRequest>::DefaultDescription()
-{
-	onUnknownField = [=] (AppNexus::NotifyRequest* br, JsonParsingContext & context)
+  DefaultDescription<AppNexus::NotifyRequest>::DefaultDescription()
+  {
+    onUnknownField = [=] (AppNexus::NotifyRequest* br, JsonParsingContext & context)
     {		
     };
 
-	addField("timestamp", &AppNexus::NotifyRequest::timestamp, "timestamp");
+    addField("timestamp", &AppNexus::NotifyRequest::timestamp, "timestamp");
     addField("user_id_64", &AppNexus::NotifyRequest::userId64, "The Id of the user");
-	addField("fail", &AppNexus::NotifyRequest::fail, "true if bid response wasn't parsed successfully.");
+    addField("fail", &AppNexus::NotifyRequest::fail, "true if bid response wasn't parsed successfully.");
     addField("error_id", &AppNexus::NotifyRequest::errorId, "error id");
     addField("error", &AppNexus::NotifyRequest::error, "error");
-	addField("response_time_ms", &AppNexus::NotifyRequest::responseTimeMs, "response_time_ms");
+    addField("response_time_ms", &AppNexus::NotifyRequest::responseTimeMs, "response_time_ms");
     addField("tags", &AppNexus::NotifyRequest::tags, "list of NotifyTag objects");    
-	addField("responses", &AppNexus::NotifyRequest::responses, "list of NotifyResponse objects");    
-}
+    addField("responses", &AppNexus::NotifyRequest::responses, "list of NotifyResponse objects");    
+  }
 
-DefaultDescription<AppNexus::NotifyRequestRoot>::DefaultDescription()
-{
-	onUnknownField = [=] (AppNexus::NotifyRequestRoot* br, JsonParsingContext & context)
+  DefaultDescription<AppNexus::NotifyRequestRoot>::DefaultDescription()
+  {
+    onUnknownField = [=] (AppNexus::NotifyRequestRoot* br, JsonParsingContext & context)
     {		
     };
 
     addField("notify_request", &AppNexus::NotifyRequestRoot::notifyRequest, "NotifyRequest object");    
-}
+  }
 
 
 } // namespace Datacratic
