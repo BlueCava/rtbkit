@@ -185,6 +185,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
       }
       OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
       impression.banner->pos.val = position.val;
+	  impression.banner->ext["tagFormat"] = reqTag.tagFormat;
       bidRequest->imp.emplace_back(std::move(impression));
     }
 	vector<string> segmentIds;
