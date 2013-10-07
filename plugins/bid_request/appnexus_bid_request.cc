@@ -16,15 +16,15 @@ using namespace std;
 
 namespace RTBKIT {
 
-/*****************************************************************************/
-/* APPNEXUS BID REQUEST PARSER                                                */
-/*****************************************************************************/
+  /*****************************************************************************/
+  /* APPNEXUS BID REQUEST PARSER                                                */
+  /*****************************************************************************/
 
-BidRequest *
-fromAppNexus(const AppNexus::BidRequest & req,
-            const std::string & provider,
-            const std::string & exchange)
-{
+  BidRequest *
+  fromAppNexus(const AppNexus::BidRequest & req,
+	       const std::string & provider,
+	       const std::string & exchange)
+  {
     // OpenRTB::User
     std::unique_ptr<OpenRTB::User> user(new OpenRTB::User);
     user->id = Id(req.bidInfo.userId64.val);
@@ -55,7 +55,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     // - OpenRTB only has a 'flashver' field which wants the version of Flash if it is present
     device->flashver = "Flash available - version unknown";
     if (req.bidInfo.noFlash.val || req.bidInfo.noFlash.val == -1) {
-        device->flashver = "Flash not available";
+      device->flashver = "Flash not available";
     }
     device->ip = req.bidInfo.ipAddress;
     // BUSINESS RULE: AN only supports one IP address field,
@@ -63,7 +63,7 @@ fromAppNexus(const AppNexus::BidRequest & req,
     device->ipv6 = req.bidInfo.ipAddress;
     // TODO Need lookup of AN int code values to strings, from AN docs
     device->carrier = to_string(req.bidInfo.carrier.val);
-   // TODO Need lookup of AN int code values to strings, from AN docs
+    // TODO Need lookup of AN int code values to strings, from AN docs
     device->make = to_string(req.bidInfo.deviceMake.val);
     // TODO Need lookup of AN int code values to strings, from AN docs
     device->model = to_string(req.bidInfo.deviceModel.val);
@@ -84,6 +84,18 @@ fromAppNexus(const AppNexus::BidRequest & req,
       device->geo->lat.val = boost::lexical_cast<float>(lat);
       device->geo->lon.val = boost::lexical_cast<float>(lon);
     }
+    // Add mobil device ids into OpenRTB::Device's ext field
+    Json::Value deviceIdsJson;
+    deviceIdsJson["idfa"] = req.bidInfo.deviceIds.idfa;
+    deviceIdsJson["sha1udid"] = req.bidInfo.deviceIds.sha1udid;
+    deviceIdsJson["md5udid"] = req.bidInfo.deviceIds.md5udid;
+    deviceIdsJson["sha1mac"] = req.bidInfo.deviceIds.sha1mac;
+    deviceIdsJson["openudid"] = req.bidInfo.deviceIds.openudid;
+    device->ext["deviceIds"] = deviceIdsJson;
+    // Add indicator "no_flash"
+    device->ext["noFlash"] = req.bidInfo.noFlash.val;
+    // Add indicator "no_cookies"
+    device->ext["noCookies"] = req.bidInfo.noCookies.val;
 
     // OpenRTB::Content
     std::unique_ptr<OpenRTB::Content> content(new OpenRTB::Content);
@@ -91,12 +103,13 @@ fromAppNexus(const AppNexus::BidRequest & req,
 
     // =========================================================================
     // BidRequest
-	std::unique_ptr<BidRequest> bidRequest(new BidRequest);
-	bidRequest->timestamp = Date::parse_date_time(req.timestamp, "%y-%m-%d", "%H:%M:%S");
+    std::unique_ptr<BidRequest> bidRequest(new BidRequest);
+    bidRequest->timestamp = Date::parse_date_time(req.timestamp, "%y-%m-%d", "%H:%M:%S");
     bidRequest->timeAvailableMs = req.bidderTimeoutMs.val;
     bidRequest->device.reset(device.release());
     bidRequest->user.reset(user.release());
-	bidRequest->auctionId = Id(req.tags.front().auctionId64.val);	
+    bidRequest->auctionId = Id(req.tags.front().auctionId64.val);	
+    bidRequest->url = Url(req.bidInfo.url);
     // bidRequest->content.reset(content.release());
 
     // OpenRTB::Publisher
@@ -181,228 +194,246 @@ fromAppNexus(const AppNexus::BidRequest & req,
         int h = boost::lexical_cast<int>(adSizePair.substr(splitIdx + 1));
         impression.banner->w.push_back(w);
         impression.banner->h.push_back(h);
-		impression.formats.push_back(Format(w,h));
+	impression.formats.push_back(Format(w,h));
       }
       OpenRTB::AdPosition position = convertAdPosition(reqTag.position);
       impression.banner->pos.val = position.val;
-	  impression.banner->ext["tagFormat"] = reqTag.tagFormat;
+      impression.banner->ext["tagFormat"] = reqTag.tagFormat;
       bidRequest->imp.emplace_back(std::move(impression));
     }
-	vector<string> segmentIds;
-	for(auto& segment : req.bidInfo.segments)
-		segmentIds.push_back(segment.id.toString());
+    vector<string> segmentIds;
+    for(auto& segment : req.bidInfo.segments)
+      segmentIds.push_back(segment.id.toString());
 
-	//Update RtbKit needed properties
-	bidRequest->provider = provider;
+    //Update RtbKit needed properties
+    bidRequest->provider = provider;
     bidRequest->exchange = (exchange.empty() ? provider : exchange);
-	bidRequest->language = bidRequest->device->language;
+    bidRequest->language = bidRequest->device->language;
     bidRequest->userAgent = bidRequest->device->ua;
-	bidRequest->ipAddress = bidRequest->device->ip;
-	bidRequest->userIds.add(bidRequest->user->id, ID_EXCHANGE);
-	bidRequest->segments.addStrings(bidRequest->exchange, segmentIds);
+    bidRequest->ipAddress = bidRequest->device->ip;
+    bidRequest->userIds.add(bidRequest->user->id, ID_EXCHANGE);
+    bidRequest->segments.addStrings(bidRequest->exchange, segmentIds);
 
-	//Add memberId to "ext" property
-	bidRequest->ext["memberId"] = req.members.size() ? req.members.front().id.toInt() : 4156;
+    //Add memberId to "ext" property
+    bidRequest->ext["memberId"] = req.members.size() ? req.members.front().id.toInt() : 4156;
+    //Add domain to "ext" property
+    bidRequest->ext["domain"] = req.bidInfo.domain;
+    //Add inventoryAttributes and contentCategories to "ext" property
+    Json::Value inventoryAttributes(Json::arrayValue);
+    Json::Value contentCategories(Json::arrayValue);
+    for (auto& inventoryAudit : req.bidInfo.inventoryAudits)
+    {
+      for (auto& inventoryAttribute : inventoryAudit.inventoryAttributes)
+      {
+	inventoryAttributes.append(inventoryAttribute.val);
+      }
+      for (auto& contentCategory : inventoryAudit.contentCategories)
+      {
+	contentCategories.append(contentCategory.val);
+      }
+    }
+    bidRequest->ext["inventoryAttributes"] = inventoryAttributes;
+    bidRequest->ext["contentCategories"] = contentCategories;
     //==========================================================================
 
     /*
-    if (req.at.value() != OpenRTB::AuctionType::SECOND_PRICE)
-        throw ML::Exception("TODO: support 1st price auctions in OpenRTB");
+      if (req.at.value() != OpenRTB::AuctionType::SECOND_PRICE)
+      throw ML::Exception("TODO: support 1st price auctions in OpenRTB");
 
-    result->auctionId = std::move(req.id);
-    result->auctionType = AuctionType::SECOND_PRICE;
-    result->timeAvailableMs = req.tmax.value();
-    result->timestamp = Date::now();
-    result->isTest = false;
-    result->unparseable = std::move(req.unparseable);
+      result->auctionId = std::move(req.id);
+      result->auctionType = AuctionType::SECOND_PRICE;
+      result->timeAvailableMs = req.tmax.value();
+      result->timestamp = Date::now();
+      result->isTest = false;
+      result->unparseable = std::move(req.unparseable);
 
-    result->provider = provider;
-    result->exchange = (exchange.empty() ? provider : exchange);
+      result->provider = provider;
+      result->exchange = (exchange.empty() ? provider : exchange);
 
-    auto onImpression = [&] (OpenRTB::Impression && imp)
-        {
-            AdSpot spot(std::move(imp));
+      auto onImpression = [&] (OpenRTB::Impression && imp)
+      {
+      AdSpot spot(std::move(imp));
 
-            // Copy the ad formats in for the moment
-            if (spot.banner) {
-                for (unsigned i = 0;  i < spot.banner->w.size();  ++i) {
-                    spot.formats.push_back(Format(spot.banner->w[i],
-                                                 spot.banner->h[i]));
-                }
-            }
+      // Copy the ad formats in for the moment
+      if (spot.banner) {
+      for (unsigned i = 0;  i < spot.banner->w.size();  ++i) {
+      spot.formats.push_back(Format(spot.banner->w[i],
+      spot.banner->h[i]));
+      }
+      }
 
-            // Now create tags
+      // Now create tags
 
-#if 0
-
-
-            spot.id = std::move(imp.id);
-            if (imp.banner) {
-                auto & b = *imp.banner;
-
-                if (b.w.size() != b.h.size())
-                    throw ML::Exception("widths and heights must match");
-
-                for (unsigned i = 0;  i < b.w.size();  ++i) {
-                    int w = b.w[i];
-                    int h = b.h[i];
-
-                    Format format(w, h);
-                    spot.formats.push_back(format);
-                }
-
-                if (!bexpdir.empty()) {
-                    spot.tagFilter.mustInclude.add("expandableTargetingNotSupported");
-                }
-                if (!bapi.empty()) {
-                    spot.tagFilter.mustInclude.add("apiFrameworksNotSupported");
-                }
-                if (!bbtype.empty()) {
-                    spot.tagFilter.mustInclude.add("creativeTypeBlockingNotSupported");
-                }
-                if (!bbattr.empty()) {
-                    spot.tagFilter.mustInclude.add("creativeTypeB");
-                    // Blocked creative attributes
-                }
-                if (!bmimes.empty()) {
-                    // We must have specified a MIME type and it must be
-                    // supported by the exchange.
-
-                }
-            }
-
-            if (!imp.displaymanager.empty()) {
-                tags.add("displayManager", imp.displaymanager);
-            }
-            if (!imp.displaymanagerver.empty()) {
-                tags.add("displayManagerVersion", imp.displaymanagerver);
-            }
-            if (!imp.instl.unspecified()) {
-                tags.add("interstitial", imp.instl.value());
-            }
-            if (!imp.tagid.empty()) {
-                tags.add("tagid", imp.tagid.value());
-            }
-            if (imp.bidfloor.value() != 0.0) {
-                if (!imp.bidfloorcur.empty())
-                    spot.reservePrice = Amount(imp.bidfloorcur,
-                                               imp.bidfloor.value() * 0.001);
-                else
-                    spot.reservePrice = USD_CPM(imp.bidfloor.value());
-            }
-            for (b: imp.iframebuster) {
-                spot.tags.add("iframebuster", b);
-            }
-#endif
-
-            result->spots.emplace_back(std::move(spot));
+      #if 0
 
 
-        };
+      spot.id = std::move(imp.id);
+      if (imp.banner) {
+      auto & b = *imp.banner;
 
-    result->spots.reserve(req.imp.size());
+      if (b.w.size() != b.h.size())
+      throw ML::Exception("widths and heights must match");
 
-    for (auto & i: req.imp)
-        onImpression(std::move(i));
+      for (unsigned i = 0;  i < b.w.size();  ++i) {
+      int w = b.w[i];
+      int h = b.h[i];
 
-    if (req.site && req.app)
-        throw ML::Exception("can't have site and app");
+      Format format(w, h);
+      spot.formats.push_back(format);
+      }
 
-    if (req.site) {
-        result->site.reset(req.site.release());
-        if (!result->site->page.empty())
-            result->url = result->site->page;
-        else if (result->site->id)
-            result->url = Url("http://" + result->site->id.toString() + ".siteid/");
-    }
-    else if (req.app) {
-        result->app.reset(req.app.release());
+      if (!bexpdir.empty()) {
+      spot.tagFilter.mustInclude.add("expandableTargetingNotSupported");
+      }
+      if (!bapi.empty()) {
+      spot.tagFilter.mustInclude.add("apiFrameworksNotSupported");
+      }
+      if (!bbtype.empty()) {
+      spot.tagFilter.mustInclude.add("creativeTypeBlockingNotSupported");
+      }
+      if (!bbattr.empty()) {
+      spot.tagFilter.mustInclude.add("creativeTypeB");
+      // Blocked creative attributes
+      }
+      if (!bmimes.empty()) {
+      // We must have specified a MIME type and it must be
+      // supported by the exchange.
 
-        if (!result->app->bundle.empty())
-            result->url = Url(result->app->bundle);
-        else if (result->app->id)
-            result->url = Url("http://" + result->app->id.toString() + ".appid/");
-    }
+      }
+      }
 
-    if (req.device) {
-        result->device.reset(req.device.release());
-        result->language = result->device->language;
-        result->userAgent = result->device->ua;
-        if (!result->device->ip.empty())
-            result->ipAddress = result->device->ip;
-        else if (!result->device->ipv6.empty())
-            result->ipAddress = result->device->ipv6;
+      if (!imp.displaymanager.empty()) {
+      tags.add("displayManager", imp.displaymanager);
+      }
+      if (!imp.displaymanagerver.empty()) {
+      tags.add("displayManagerVersion", imp.displaymanagerver);
+      }
+      if (!imp.instl.unspecified()) {
+      tags.add("interstitial", imp.instl.value());
+      }
+      if (!imp.tagid.empty()) {
+      tags.add("tagid", imp.tagid.value());
+      }
+      if (imp.bidfloor.value() != 0.0) {
+      if (!imp.bidfloorcur.empty())
+      spot.reservePrice = Amount(imp.bidfloorcur,
+      imp.bidfloor.value() * 0.001);
+      else
+      spot.reservePrice = USD_CPM(imp.bidfloor.value());
+      }
+      for (b: imp.iframebuster) {
+      spot.tags.add("iframebuster", b);
+      }
+      #endif
 
-        if (result->device->geo) {
-            const auto & g = *result->device->geo;
-            auto & l = result->location;
-            l.countryCode = g.country;
-            if (!g.region.empty())
-                l.regionCode = g.region;
-            else l.regionCode = g.regionfips104;
-            l.cityName = g.city;
-            l.postalCode = g.zip;
+      result->spots.emplace_back(std::move(spot));
 
-            // TODO: DMA
-        }
-    }
 
-    if (req.user) {
-        result->user.reset(req.user.release());
-        for (auto & d: result->user->data) {
-            string key;
-            if (d.id)
-                key = d.id.toString();
-            else key = d.name;
+      };
 
-            vector<string> values;
-            for (auto & v: d.segment) {
-                if (v.id)
-                    values.push_back(v.id.toString());
-                else if (!v.name.empty())
-                    values.push_back(v.name);
-            }
+      result->spots.reserve(req.imp.size());
 
-            result->segments.addStrings(key, values);
-        }
+      for (auto & i: req.imp)
+      onImpression(std::move(i));
 
-        if (result->user->tz.val != -1)
-            result->location.timezoneOffsetMinutes = result->user->tz.val;
+      if (req.site && req.app)
+      throw ML::Exception("can't have site and app");
 
-        if (result->user->id)
-            result->userIds.add(result->user->id, ID_EXCHANGE);
-        if (result->user->buyeruid)
-            result->userIds.add(result->user->buyeruid, ID_PROVIDER);
-    }
+      if (req.site) {
+      result->site.reset(req.site.release());
+      if (!result->site->page.empty())
+      result->url = result->site->page;
+      else if (result->site->id)
+      result->url = Url("http://" + result->site->id.toString() + ".siteid/");
+      }
+      else if (req.app) {
+      result->app.reset(req.app.release());
 
-    if (!req.cur.empty()) {
-        for (unsigned i = 0;  i < req.cur.size();  ++i) {
-            result->bidCurrency.push_back(Amount::parseCurrency(req.cur[i]));
-        }
-    }
-    else {
-        result->bidCurrency.push_back(CurrencyCode::CC_USD);
-    }
-*/
+      if (!result->app->bundle.empty())
+      result->url = Url(result->app->bundle);
+      else if (result->app->id)
+      result->url = Url("http://" + result->app->id.toString() + ".appid/");
+      }
+
+      if (req.device) {
+      result->device.reset(req.device.release());
+      result->language = result->device->language;
+      result->userAgent = result->device->ua;
+      if (!result->device->ip.empty())
+      result->ipAddress = result->device->ip;
+      else if (!result->device->ipv6.empty())
+      result->ipAddress = result->device->ipv6;
+
+      if (result->device->geo) {
+      const auto & g = *result->device->geo;
+      auto & l = result->location;
+      l.countryCode = g.country;
+      if (!g.region.empty())
+      l.regionCode = g.region;
+      else l.regionCode = g.regionfips104;
+      l.cityName = g.city;
+      l.postalCode = g.zip;
+
+      // TODO: DMA
+      }
+      }
+
+      if (req.user) {
+      result->user.reset(req.user.release());
+      for (auto & d: result->user->data) {
+      string key;
+      if (d.id)
+      key = d.id.toString();
+      else key = d.name;
+
+      vector<string> values;
+      for (auto & v: d.segment) {
+      if (v.id)
+      values.push_back(v.id.toString());
+      else if (!v.name.empty())
+      values.push_back(v.name);
+      }
+
+      result->segments.addStrings(key, values);
+      }
+
+      if (result->user->tz.val != -1)
+      result->location.timezoneOffsetMinutes = result->user->tz.val;
+
+      if (result->user->id)
+      result->userIds.add(result->user->id, ID_EXCHANGE);
+      if (result->user->buyeruid)
+      result->userIds.add(result->user->buyeruid, ID_PROVIDER);
+      }
+
+      if (!req.cur.empty()) {
+      for (unsigned i = 0;  i < req.cur.size();  ++i) {
+      result->bidCurrency.push_back(Amount::parseCurrency(req.cur[i]));
+      }
+      }
+      else {
+      result->bidCurrency.push_back(CurrencyCode::CC_USD);
+      }
+    */
 
     return bidRequest.release();
-}
+  }
 
-/*
-namespace {
+  /*
+    namespace {
 
     static Datacratic::DefaultDescription<AppNexus::BidRequest> desc;
 
-} // file scope
-*/
+    } // file scope
+  */
 
 
-BidRequest *
-AppNexusBidRequestParser::
-parseBidRequest(const std::string & jsonValue,
-                const std::string & provider,
-                const std::string & exchange)
-{
+  BidRequest *
+  AppNexusBidRequestParser::
+  parseBidRequest(const std::string & jsonValue,
+		  const std::string & provider,
+		  const std::string & exchange)
+  {
     StructuredJsonParsingContext jsonContext(jsonValue);
 
     AppNexus::BidRequestRoot reqRoot;
@@ -410,14 +441,14 @@ parseBidRequest(const std::string & jsonValue,
     desc.parseJson(&reqRoot, jsonContext);
 
     return fromAppNexus(reqRoot.bidRequest, provider, exchange);
-}
+  }
 
-BidRequest *
-AppNexusBidRequestParser::
-parseBidRequest(ML::Parse_Context & context,
-                const std::string & provider,
-                const std::string & exchange)
-{
+  BidRequest *
+  AppNexusBidRequestParser::
+  parseBidRequest(ML::Parse_Context & context,
+		  const std::string & provider,
+		  const std::string & exchange)
+  {
     StreamingJsonParsingContext jsonContext(context);
 
     AppNexus::BidRequestRoot reqRoot;
@@ -425,7 +456,7 @@ parseBidRequest(ML::Parse_Context & context,
     desc.parseJson(&reqRoot, jsonContext);
 
     return fromAppNexus(reqRoot.bidRequest, provider, exchange);
-}
+  }
 
 } // namespace RTBKIT
 
