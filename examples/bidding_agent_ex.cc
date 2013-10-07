@@ -94,7 +94,7 @@ struct FixedPriceBiddingAgent :
         // Accounts are used to control the allocation of spending budgets for
         // an agent. The whole mechanism is fully generic and can be setup in
         // whatever you feel it bests suits you.
-        config.account = {"account", "bluecava"};
+        config.account = {"hello", "world"};
 
         // Specify the properties of the creatives we are trying to show.
         config.creatives.push_back(Creative::sampleLB);
@@ -145,8 +145,6 @@ struct FixedPriceBiddingAgent :
             double timeLeftMs,
             const Json::Value & augmentations)
     {
-		std::cout << "Biddr::bid" << std::endl;
-
 		for (Bid& bid : bids) {
 
             // In our example, all our creatives are of the different sizes so
@@ -164,15 +162,13 @@ struct FixedPriceBiddingAgent :
             // Create a 0.0001$ CPM bid with our available creative.
             // Note that by default, the bid price is set to 0 which indicates
             // that we don't wish to bid on the given spot.
-			//bid.account = {"hello", "world"};
-			//bid.account = {"360i", "account"};
-            bid.bid(availableCreative, MicroUSD(2000));
-        }		
+            bid.bid(availableCreative, MicroUSD(100));
+        }
 
 		// A value that will be passed back to us when we receive the result of
         // our bid.
         Json::Value metadata;
-		metadata["creativeId"] = 691600;
+		metadata["creativeId"] = 1234567;
 		metadata["pixelUrl"] = "http://www.bluecava.com/";
 		metadata["pixelType"] = "image";
 
@@ -184,15 +180,14 @@ struct FixedPriceBiddingAgent :
     /** Simple pacing scheme which allocates 1$ to spend every period. */
     void pace()
     {
-		RTBKIT::AccountKey accountKey = {"account", "bluecava"};
         // We need to register our account once with the banker service.
         if (!accountSetup) {
             accountSetup = true;
-            budgetController.addAccountSync(accountKey);
+            budgetController.addAccountSync(config.account);
         }
 
         // Make sure we have 1$ to spend for the next period.
-        budgetController.topupTransferSync(accountKey, USD(1));
+        budgetController.topupTransferSync(config.account, USD(1));
     }
 
 
