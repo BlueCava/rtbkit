@@ -212,7 +212,7 @@ namespace RTBKIT {
     bidRequest->userAgent = bidRequest->device->ua;
     bidRequest->ipAddress = bidRequest->device->ip;
     bidRequest->userIds.add(bidRequest->user->id, ID_EXCHANGE);
-    bidRequest->segments.addStrings(bidRequest->exchange, segmentIds);
+    bidRequest->segments.addStrings("AppNexus", segmentIds);
 
     //Add memberId to "ext" property
     bidRequest->ext["memberId"] = req.members.size() ? req.members.front().id.toInt() : 4156;
