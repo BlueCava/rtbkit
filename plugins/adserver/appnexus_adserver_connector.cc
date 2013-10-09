@@ -59,6 +59,7 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 		const HttpHeader & header,
 		const Json::Value & json, 
 		const std::string & jsonStr) {	
+
 	StructuredJsonParsingContext jsonContext(json);
 	AppNexus::NotifyRequestRoot notifyRoot;
 	DefaultDescription<AppNexus::NotifyRequestRoot> desc;
@@ -66,20 +67,26 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 
 	auto& notifyRequest = notifyRoot.notifyRequest;
 
-	Date timestamp = Date::parse_date_time(notifyRequest.timestamp, "%y-%m-%d", "%H:%M:%S");
-	AccountKey accountKey;
+	UserIds userIds;
+	userIds.add(Id(notifyRequest.userId64.val), ID_EXCHANGE);
+
+	Date timestamp = Date::parse_date_time(notifyRequest.timestamp, "%y-%m-%d", "%H:%M:%S");	
 	
 	for(auto& tag : notifyRequest.tags) {
-		UserIds userIds;
-		userIds.add(Id(tag.userId64.val), ID_EXCHANGE);
-		publishWin(Id(tag.auctionId64.val), 
-				   Id(tag.creativeId.val), 
-				   USD_CPM(tag.pricePaid.val), 
-				   timestamp, 
-				   tag.customNotifyData.empty() ? Json::Value() : Json::parse(tag.customNotifyData), 
-				   userIds, 
-				   accountKey, 
-				   timestamp); 	
+		if(tag.notifyType == "won" ||
+		   tag.notifyType == "kept") {			
+			auto customData = Json::parse(tag.customNotifyData);
+			AccountKey accountKey(customData["accountId"].asString());			
+
+			publishWin(Id(tag.auctionId64.val),
+					   Id(tag.creativeId.val),
+					   USD_CPM(tag.pricePaid.val),
+					   timestamp,
+					   customData,
+					   userIds,
+					   accountKey,
+					   timestamp);
+		}
 	}
 }
 

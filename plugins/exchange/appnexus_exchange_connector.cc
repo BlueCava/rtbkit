@@ -137,9 +137,12 @@ getResponse(const HttpAuctionHandler & connection,
 			bidResponse.pixelUrl = respMeta["pixelUrl"].asString();
 			bidResponse.pixelType = respMeta["pixelType"].asString();
 
+			Json::Value customData;
+			customData["accountId"] = resp.account.toString();
+			bidResponse.customNotifyData = customData.toString();
+
 			//TODO: might be useful to set data on AppNexus cookies.
-			//bidResponse.userDataJS = "";
-			//bidResponse.customNotifyData = "";
+			//bidResponse.userDataJS = "";			
 		}
 	}
 
