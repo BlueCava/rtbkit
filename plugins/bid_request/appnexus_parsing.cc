@@ -205,8 +205,8 @@ namespace Datacratic {
       getEntry(0, br->unparseable) = context.expectJson();
     };
 
-    addField("auditor_member_id", &AppNexus::InventoryAudit::auditorMemberId, "AN member Id");
-    addField("intended_audience", &AppNexus::InventoryAudit::intendedAudience, "AN enum set of audience textual codes");
+    //addField("auditor_member_id", &AppNexus::InventoryAudit::auditorMemberId, "AN member Id");
+    //addField("intended_audience", &AppNexus::InventoryAudit::intendedAudience, "AN enum set of audience textual codes");
     addField("inventory_attributes", &AppNexus::InventoryAudit::inventoryAttributes, "Integer codes from AN inventory attribute service");
     addField("content_categories", &AppNexus::InventoryAudit::contentCategories, "Content codes from AN content attribute service");
     addField("unparseable", &AppNexus::InventoryAudit::unparseable, "Unparseable fields are collected here");
