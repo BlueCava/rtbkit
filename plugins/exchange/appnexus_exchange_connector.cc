@@ -139,6 +139,7 @@ getResponse(const HttpAuctionHandler & connection,
 
 			Json::Value customData;
 			customData["accountId"] = resp.account.toString();
+			customData["bidSpotIndex"] = respMeta["bidSpotIndex"];
 			bidResponse.customNotifyData = customData.toString();
 
 			//TODO: might be useful to set data on AppNexus cookies.

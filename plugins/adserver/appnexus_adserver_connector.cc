@@ -59,7 +59,6 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 		const HttpHeader & header,
 		const Json::Value & json, 
 		const std::string & jsonStr) {	
-
 	StructuredJsonParsingContext jsonContext(json);
 	AppNexus::NotifyRequestRoot notifyRoot;
 	DefaultDescription<AppNexus::NotifyRequestRoot> desc;
@@ -79,13 +78,13 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 			AccountKey accountKey(customData["accountId"].asString());			
 
 			publishWin(Id(tag.auctionId64.val),
-					   Id(tag.creativeId.val),
+					   Id(customData["bidSpotIndex"].asInt()),
 					   USD_CPM(tag.pricePaid.val),
 					   timestamp,
 					   customData,
 					   userIds,
 					   accountKey,
-					   timestamp);
+					   Date::now());
 		}
 	}
 }
