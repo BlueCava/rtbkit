@@ -78,7 +78,7 @@ void AppNexusAdServerConnector::handleNotificationRequests(
 			AccountKey accountKey(customData["accountId"].asString());			
 
 			publishWin(Id(tag.auctionId64.val),
-					   Id(customData["bidSpotIndex"].asInt()),
+					   Id::fromJson(customData["bidSpotIndex"]),
 					   USD_CPM(tag.pricePaid.val),
 					   timestamp,
 					   customData,
